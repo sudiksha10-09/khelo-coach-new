@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Academy Command Center</h2>
+        <a href="{{ url_for('new_job') }}" class="btn btn-primary">Post New Job</a>
+    </div>
+
+    <!-- Applicants Table -->
+    <div class="glass-card p-4">
+        <h4 class="mb-4">Candidate Pipeline</h4>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-white">{{ app.applicant.profile.full_name }}</div>
+                            <small class="text-muted">{{ app.job.title }}</small>
+                            <!-- Show average rating if available -->
+                            {% if app.applicant.profile.reviews %}
+                                <div class="text-warning small"><i class="fas fa-star"></i> Rated Coach</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if app.status == 'Hired' %}<span class="badge bg-success">Hired</span>
+                            {% elif app.status == 'Shortlisted' %}<span class="badge bg-info">Shortlisted</span>
+                            {% elif app.status == 'Interview' %}<span class="badge bg-warning text-dark">Interviewing</span>
+                            {% else %}<span class="badge bg-secondary">Applied</span>{% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#modal{{ app.id }}">Manage</button>
+
+                            <!-- MANAGE CANDIDATE MODAL -->
+                            <div class="modal fade" id="modal{{ app.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content glass-card border-0 text-light">
+                                        <div class="modal-header border-bottom border-secondary">
+                                            <h5 class="modal-title">{{ app.applicant.profile.full_name }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <!-- Video/Bio Info here (reuse from previous) -->
+                                                    <p>{{ app.applicant.profile.bio }}</p>
+                                                    <div class="d-grid gap-2 mb-3">
+                                                        <a href="{{ url_for('update_status', app_id=app.id, new_status='Shortlisted') }}" class="btn btn-info">Shortlist</a>
+                                                        <a href="{{ url_for('update_status', app_id=app.id, new_status='Interview') }}" class="btn btn-warning">Interview</a>
+                                                        <a href="{{ url_for('update_status', app_id=app.id, new_status='Hired') }}" class="btn btn-success">Hire</a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 border-start border-secondary ps-4">
+                                                    <!-- REVIEW SECTION -->
+                                                    <h6 class="text-warning fw-bold"><i class="fas fa-star me-2"></i>Rate this Coach</h6>
+                                                    <form action="{{ url_for('submit_review', profile_id=app.applicant.profile.id) }}" method="POST">
+                                                        <div class="mb-2">
+                                                            <label class="small text-muted">Rating (1-5)</label>
+                                                            <select name="rating" class="form-select form-select-sm">
+                                                                <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                                                                <option value="4">⭐⭐⭐⭐ (Good)</option>
+                                                                <option value="3">⭐⭐⭐ (Average)</option>
+                                                                <option value="2">⭐⭐ (Poor)</option>
+                                                                <option value="1">⭐ (Bad)</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Write a review..."></textarea>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-sm btn-outline-warning w-100">Submit Review</button>
+                                                    </form>
+                                                    
+                                                    <!-- Previous Reviews -->
+                                                    <h6 class="mt-4 small text-muted">Past Reviews</h6>
+                                                    <div style="max-height: 150px; overflow-y: auto;">
+                                                        {% for rev in app.applicant.profile.reviews %}
+                                                        <div class="p-2 border border-secondary rounded mb-2 bg-dark">
+                                                            <div class="d-flex justify-content-between">
+                                                                <small class="text-warning">{{ "★" * rev.rating }}</small>
+                                                                <small class="text-muted" style="font-size: 10px;">{{ rev.date.strftime('%d/%m') }}</small>
+                                                            </div>
+                                                            <p class="small mb-0 text-light opacity-75">{{ rev.comment }}</p>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

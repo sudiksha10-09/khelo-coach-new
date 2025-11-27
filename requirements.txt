@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+werkzeug
+email_validator
+authlib
+requests
+flask-mail
+gunicorn

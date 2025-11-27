@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold">Edit Profile</h3>
+                    {% if profile.is_verified %}
+                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Verified</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Unverified</span>
+                    {% endif %}
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Full Name</label>
+                            <input type="text" class="form-control" name="full_name" value="{{ profile.full_name or '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Phone</label>
+                            <input type="tel" class="form-control" name="phone" value="{{ profile.phone or '' }}" placeholder="+91...">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Sport</label>
+                            <select class="form-select" name="sport">
+                                <option value="Cricket" {% if profile.sport == 'Cricket' %}selected{% endif %}>Cricket</option>
+                                <option value="Football" {% if profile.sport == 'Football' %}selected{% endif %}>Football</option>
+                                <option value="Tennis" {% if profile.sport == 'Tennis' %}selected{% endif %}>Tennis</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Years Exp</label>
+                            <input type="number" class="form-control" name="experience_years" value="{{ profile.experience_years or 0 }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Bio</label>
+                        <textarea class="form-control" name="bio" rows="3">{{ profile.bio or '' }}</textarea>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary rounded bg-dark bg-opacity-25">
+                                <label class="form-label text-primary fw-bold"><i class="fas fa-video me-2"></i>Video Resume</label>
+                                <input type="file" class="form-control form-control-sm" name="video_resume" accept="video/*">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary rounded bg-dark bg-opacity-25">
+                                <label class="form-label text-warning fw-bold"><i class="fas fa-file-alt me-2"></i>Certificates</label>
+                                <input type="file" class="form-control form-control-sm" name="cert_proof" accept=".pdf,.jpg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light px-4">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

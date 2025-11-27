@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Page Specific Styles for Home */
+    .hero-bg {
+        background: url('https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+        position: relative;
+        height: 85vh;
+        display: flex;
+        align-items: center;
+    }
+    .hero-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, rgba(15, 12, 41, 0.9), rgba(48, 43, 99, 0.8), rgba(36, 36, 62, 0.9));
+    }
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+    }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 30px;
+        transition: transform 0.3s ease;
+        color: white; /* Force white text inside cards */
+    }
+    .glass-card:hover {
+        transform: translateY(-10px);
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .step-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        margin-bottom: 20px;
+        box-shadow: 0 0 20px rgba(0, 242, 96, 0.4);
+    }
+    .nav-pills .nav-link {
+        color: #94a3b8; /* Muted text for inactive tabs */
+        background: transparent;
+        font-weight: 600;
+        padding: 15px 30px;
+        border-radius: 30px;
+    }
+    .nav-pills .nav-link.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 242, 96, 0.3);
+    }
+</style>
+
+<!-- HERO SECTION -->
+<div class="hero-bg">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content text-center">
+        <h1 class="display-3 fw-bold mb-4 animate-fade-up">
+            Recruitment, <span style="color: var(--primary);">Reimagined.</span>
+        </h1>
+        <p class="lead mb-5 opacity-75 animate-fade-up" style="animation-delay: 0.2s;">
+            The first AI-powered ecosystem connecting elite sports academies with verified coaching talent.
+            <br>Video Resumes. Smart Matching. Instant Trust.
+        </p>
+        
+        <div class="animate-fade-up" style="animation-delay: 0.4s;">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-5 py-3 me-3 shadow-lg">
+                    <i class="fas fa-rocket me-2"></i> Get Started
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5 py-3">
+                    Login
+                </a>
+            {% else %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-5 py-3">
+                    <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- WORKFLOW SECTION -->
+<div class="container py-5 my-5">
+    <div class="text-center mb-5">
+        <h5 class="text-primary fw-bold text-uppercase ls-2">Workflow</h5>
+        <h2 class="fw-bold display-5 text-white">How Khelo Coach Works</h2>
+    </div>
+
+    <!-- Toggle Buttons -->
+    <div class="d-flex justify-content-center mb-5">
+        <ul class="nav nav-pills bg-white bg-opacity-10 p-2 rounded-pill shadow-sm border border-secondary" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="pills-coach-tab" data-bs-toggle="pill" data-bs-target="#pills-coach" type="button">For Coaches</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="pills-academy-tab" data-bs-toggle="pill" data-bs-target="#pills-academy" type="button">For Academies</button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tab-content" id="pills-tabContent">
+        
+        <!-- COACH WORKFLOW -->
+        <div class="tab-pane fade show active" id="pills-coach">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto"><i class="fas fa-user-plus"></i></div>
+                        <h5>1. Build Profile</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Sign up and upload your Video Resume. Show, don't just tell.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto bg-info"><i class="fas fa-check-double"></i></div>
+                        <h5>2. Get Verified</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Upload certifications. Admin verifies you. You get the Badge.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto bg-warning"><i class="fas fa-search-location"></i></div>
+                        <h5>3. Smart Search</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Use "Near Me" map filters or let AI match you to the best jobs.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto bg-success"><i class="fas fa-handshake"></i></div>
+                        <h5>4. Get Hired</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Apply with one click. Get shortlisted. Start coaching.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACADEMY WORKFLOW -->
+        <div class="tab-pane fade" id="pills-academy">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto"><i class="fas fa-map-marked-alt"></i></div>
+                        <h5>1. Post & Pin</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Post a job and pin the exact location on the interactive map.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto bg-info"><i class="fas fa-robot"></i></div>
+                        <h5>2. AI Screening</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Our AI ranks candidates by match %. Save time on screening.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto bg-warning"><i class="fas fa-play-circle"></i></div>
+                        <h5>3. Video Review</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Watch candidate techniques instantly via Video Resumes.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="glass-card h-100 p-4 border-0 shadow-sm text-center">
+                        <div class="step-icon mx-auto bg-success"><i class="fas fa-unlock-alt"></i></div>
+                        <h5>4. Unlock & Hire</h5>
+                        <!-- FIXED: Changed text-muted to text-light opacity-75 -->
+                        <p class="text-light opacity-75 small">Shortlist to unlock contact info and hire the best talent.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VISUALIZATION SECTION: THE FUTURE OF HIRING -->
+<div class="container-fluid py-5 position-relative overflow-hidden" style="background: var(--darker-bg);">
+    
+    <!-- Decorative Background Glow -->
+    <div class="position-absolute top-50 start-50 translate-middle" 
+         style="width: 600px; height: 600px; background: var(--primary); opacity: 0.1; filter: blur(100px); border-radius: 50%; z-index: 0;"></div>
+
+    <div class="container position-relative z-1">
+        <div class="row align-items-center">
+            
+            <!-- Text Side -->
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h5 class="text-secondary text-uppercase letter-spacing-2 mb-3">The Technology</h5>
+                <h2 class="display-5 fw-bold mb-4 text-white">Data-Driven <span class="text-gradient">Scouting</span></h2>
+                <p class="text-light opacity-75 mb-4 lead">
+                    We don't just list jobs. We analyze 50+ data points from every video resume to predict the perfect coach-academy fit.
+                </p>
+                
+                <div class="row g-4 mt-2">
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                <i class="fas fa-chart-line text-primary fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-0 text-white">AI Analysis</h5>
+                                <small class="text-muted">Skill Scoring</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-secondary bg-opacity-10 p-3 rounded-circle me-3">
+                                <i class="fas fa-shield-alt text-secondary fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-0 text-white">Verified Trust</h5>
+                                <small class="text-muted">Background Checks</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-light px-4 py-2">
+                        Explore the Tech <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Image Side with Neon Effect -->
+            <div class="col-lg-6 text-center">
+                <div class="position-relative">
+                    <!-- The Tech Image -->
+                    <img src="{{ url_for('static', filename='images/future_tech.jpg') }}" 
+                         class="img-fluid rounded-4 shadow-lg" 
+                         alt="Future Sports Tech"
+                         style="border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 0 50px rgba(0, 242, 96, 0.2);">
+                    
+                    <!-- Floating UI Card Overlay (Visual candy) -->
+                    <div class="glass-card position-absolute bottom-0 start-0 m-4 p-3 d-none d-md-block" style="max-width: 250px; text-align: left;">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="spinner-grow text-success spinner-grow-sm me-2" role="status"></div>
+                            <small class="fw-bold text-success">Live Matching</small>
+                        </div>
+                        <p class="small text-white mb-0 opacity-75">Processing video data for Coach Rahul...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

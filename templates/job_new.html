@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-4 p-md-5">
+                <h3 class="fw-bold mb-4">Post a New Job</h3>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Job Title</label>
+                        <input type="text" class="form-control" name="title" placeholder="e.g. Head Coach U-19" required>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Sport</label>
+                            <select class="form-select" name="sport">
+                                <option value="Cricket">Cricket</option>
+                                <option value="Football">Football</option>
+                                <option value="Tennis">Tennis</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Venue Name</label>
+                            <input type="text" class="form-control" name="location" placeholder="e.g. DDA Sports Complex" required>
+                        </div>
+                    </div>
+
+                    <!-- MAP SEARCH & PICKER -->
+                    <div class="mb-4">
+                        <label class="form-label text-primary fw-bold">Pin Location</label>
+                        
+                        <!-- Search Bar -->
+                        <div class="input-group mb-1">
+                            <input type="text" id="addressInput" class="form-control" 
+                                   placeholder="Search City or Sector (e.g. Sector 29 Gurgaon)">
+                            <button class="btn btn-outline-light" type="button" onclick="searchAddress()" id="searchBtn">
+                                <i class="fas fa-search"></i> Locate
+                            </button>
+                        </div>
+                        
+                        <!-- Error Message Container -->
+                        <div id="mapError" class="text-warning small mb-2" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i> Location not found. Try searching for just the City or Sector.
+                        </div>
+
+                        <div id="pickerMap" style="height: 300px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);"></div>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fas fa-info-circle"></i> Search for the area, then <b>click on the map</b> to pin the exact spot.
+                        </small>
+                        
+                        <!-- Hidden Inputs -->
+                        <input type="hidden" name="lat" id="lat">
+                        <input type="hidden" name="lng" id="lng">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Job Description</label>
+                        <textarea class="form-control" name="description" rows="4"></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small">Salary Range</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="salary" placeholder="e.g. 40000 - 60000" value="{{ predicted_salary if predicted_salary else '' }}">
+                            <button class="btn btn-outline-light" type="submit" name="predict" value="true">
+                                <i class="fas fa-magic me-2"></i> AI Predict
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">Publish Job</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // 1. Initialize Map (Default Center: India)
+    var map = L.map('pickerMap').setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    var marker;
+
+    // Function to update hidden inputs and marker
+    function updateLocation(lat, lng) {
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+        document.getElementById('mapError').style.display = 'none'; // Hide error if success
+
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng]).addTo(map);
+        }
+        map.panTo([lat, lng]);
+    }
+
+    // 2. Handle Manual Click on Map
+    map.on('click', function(e) {
+        updateLocation(e.latlng.lat, e.latlng.lng);
+    });
+
+    // 3. Handle Address Search
+    async function searchAddress() {
+        var query = document.getElementById('addressInput').value;
+        var btn = document.getElementById('searchBtn');
+        var errorDiv = document.getElementById('mapError');
+        
+        if (!query) return;
+
+        // Visual Feedback
+        btn.innerHTML = '<div class="spinner-border spinner-border-sm"></div>';
+        errorDiv.style.display = 'none';
+
+        // Use OpenStreetMap Nominatim API
+        // Added 'countrycodes=in' to prioritize India results
+        var url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                var lat = parseFloat(data[0].lat);
+                var lon = parseFloat(data[0].lon);
+                updateLocation(lat, lon);
+                map.setZoom(14);
+            } else {
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = '<i class="fas fa-times-circle"></i> Address not found. Try searching just for "Sector X" or "City".';
+            }
+        } catch (error) {
+            console.error("Geocoding error:", error);
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = "Connection error. Please try again.";
+        } finally {
+            btn.innerHTML = '<i class="fas fa-search"></i> Locate';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="glass-card p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Join the League</h3>
+                    <p class="text-muted small">Create your account to start scouting or coaching.</p>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Username</label>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Email Address</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Password</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label text-muted small">I am a...</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="role" id="roleCoach" value="coach" checked>
+                                <label class="btn btn-outline-light w-100" for="roleCoach">
+                                    <i class="fas fa-running mb-1 d-block"></i> Coach
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="role" id="roleEmp" value="employer">
+                                <label class="btn btn-outline-light w-100" for="roleEmp">
+                                    <i class="fas fa-building mb-1 d-block"></i> Academy
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">Create Account</button>
+                </form>
+                <p class="mt-4 text-center text-muted small">
+                    Already joined? <a href="{{ url_for('login') }}" class="text-primary text-decoration-none">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="glass-card p-4 mb-4 bg-warning bg-opacity-10 border-warning">
+        <h2 class="text-warning fw-bold mb-0"><i class="fas fa-shield-alt me-2"></i> Super Admin</h2>
+        <p class="text-light opacity-75 mb-0">Platform Verification Center</p>
+    </div>
+
+    <div class="glass-card p-4">
+        <h4 class="mb-4">Pending Verifications</h4>
+        {% if coaches %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Coach</th>
+                        <th>Sport</th>
+                        <th>Claimed Certs</th>
+                        <th>Proof</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coach in coaches %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold">{{ coach.full_name }}</div>
+                            <small class="text-muted">{{ coach.user.email }}</small>
+                        </td>
+                        <td>{{ coach.sport }}</td>
+                        <td>{{ coach.certifications }}</td>
+                        <td>
+                            <a href="{{ url_for('static', filename='certs/' + coach.cert_proof_path) }}" target="_blank" class="btn btn-sm btn-outline-light">
+                                <i class="fas fa-file-pdf me-1"></i> View
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('verify_coach', profile_id=coach.id) }}" class="btn btn-sm btn-success">Approve</a>
+                            <a href="{{ url_for('reject_coach', profile_id=coach.id) }}" class="btn btn-sm btn-danger">Reject</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-check-double fa-3x mb-3"></i>
+            <h5>All Caught Up</h5>
+            <p>No pending verifications.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
