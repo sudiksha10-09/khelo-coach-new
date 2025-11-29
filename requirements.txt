@@ -7,3 +7,4 @@ authlib
 requests
 flask-mail
 gunicorn
+python-dotenv
