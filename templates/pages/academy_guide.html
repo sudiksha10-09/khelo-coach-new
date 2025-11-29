@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-card p-5">
+                <div class="text-center mb-5">
+                    <h1 class="fw-bold mb-2"><i class="fas fa-university me-3 text-primary"></i>Academy Guide</h1>
+                    <p class="text-muted lead">How to hire the best talent on KoachSmart.</p>
+                </div>
+
+                <div class="d-flex mb-4">
+                    <div class="me-4">
+                        <div class="bg-primary text-black rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; font-size: 1.2rem;">1</div>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold">Post a Job</h4>
+                        <p class="text-muted">Log in as an employer and click "Post Job". Use our AI Auto-Fill feature to upload a PDF description, or fill in the details manually. Be specific about the Sport and Location.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-4">
+                    <div class="me-4">
+                        <div class="bg-primary text-black rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; font-size: 1.2rem;">2</div>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold">Screen Candidates</h4>
+                        <p class="text-muted">Go to your Dashboard to see applicants. Our AI gives each applicant a "Match Score" based on their skills vs your requirements. Watch their Video Resumes directly in the browser.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-4">
+                    <div class="me-4">
+                        <div class="bg-primary text-black rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; font-size: 1.2rem;">3</div>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold">Interview & Hire</h4>
+                        <p class="text-muted">Click "Update Status" to move a candidate to the Interview stage. This sends them an email notification. Once you find the right fit, mark them as "Hired"!</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('new_job') }}" class="btn btn-primary px-5 py-2">Post a Job Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

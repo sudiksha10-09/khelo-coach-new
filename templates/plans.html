@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-white">Choose Your Plan</h1>
+        <p class="text-muted lead">Transparent pricing for Academies and Coaches.</p>
+    </div>
+
+    <div class="row justify-content-center align-items-stretch">
+        <div class="col-md-4 mb-4">
+            <div class="glass-card h-100 p-4 border-primary position-relative" style="background: rgba(13, 110, 253, 0.1);">
+                <div class="badge bg-primary position-absolute top-0 end-0 m-3">RECOMMENDED</div>
+                <h3 class="fw-bold mb-1">Academy Pro</h3>
+                <div class="display-5 fw-bold text-white my-3">₹1,999<span class="fs-6 text-muted fw-normal">/month</span></div>
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Unlimited Job Posts</li>
+                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Access Resume Database</li>
+                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Verified Coach Badges</li>
+                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> AI Salary Prediction</li>
+                </ul>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary w-100 py-2">Get Started</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="glass-card h-100 p-4">
+                <h3 class="fw-bold mb-1">Coach Basic</h3>
+                <div class="display-5 fw-bold text-white my-3">FREE<span class="fs-6 text-muted fw-normal">/forever</span></div>
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Create Digital Profile</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Upload Video Resume</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Apply to Jobs</li>
+                    <li class="mb-2 text-muted"><i class="fas fa-times me-2"></i> Top of Search Results</li>
+                </ul>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light w-100 py-2">Continue Free</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="glass-card h-100 p-4">
+                <h3 class="fw-bold mb-1">Coach Premium</h3>
+                <div class="display-5 fw-bold text-white my-3">₹499<span class="fs-6 text-muted fw-normal">/month</span></div>
+                <ul class="list-unstyled text-start mb-4">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> All Basic Features</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> <strong>Top of Search Results</strong></li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Profile Analytics</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Priority Support</li>
+                </ul>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light w-100 py-2">Upgrade</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

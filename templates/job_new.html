@@ -2,38 +2,43 @@
 
 {% block content %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>select option { background-color: #0f172a; color: white; }</style>
 
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-9">
             
-            <!-- AI AUTO-FILL FEATURE -->
-            <div class="glass-card p-4 mb-4 bg-gradient-primary border-primary">
-                <form method="POST" enctype="multipart/form-data" class="d-flex align-items-center justify-content-between">
+            <div class="glass-card p-4 mb-4 position-relative overflow-hidden">
+                <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); z-index: -1;"></div>
+                
+                <form method="POST" enctype="multipart/form-data" class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                     <div>
-                        <h5 class="fw-bold mb-1 text-white"><i class="fas fa-magic me-2"></i>Auto-Fill from Document</h5>
-                        <p class="mb-0 text-white opacity-75 small">Upload a PDF/Word Job Description, and our AI will fill the form.</p>
+                        <h5 class="fw-bold mb-1 text-white"><i class="fas fa-robot me-2 text-primary"></i>AI Auto-Fill</h5>
+                        <p class="mb-0 text-muted small">Upload a PDF/Word Job Description, and we'll fill the form for you.</p>
                     </div>
                     <div class="d-flex gap-2">
-                        <input type="file" name="job_doc" class="form-control form-control-sm" accept=".pdf,.docx,.txt" required>
-                        <button type="submit" name="parse_doc" value="true" class="btn btn-light btn-sm fw-bold">Upload & Fill</button>
+                        <input type="file" name="job_doc" class="form-control form-control-sm" accept=".pdf,.docx,.txt" style="width: auto;" required>
+                        <button type="submit" name="parse_doc" value="true" class="btn btn-light btn-sm fw-bold">
+                            <i class="fas fa-magic me-1"></i> Auto-Fill
+                        </button>
                     </div>
                 </form>
             </div>
 
             <div class="glass-card p-4 p-md-5">
-                <h3 class="fw-bold mb-4">Post a New Job</h3>
+                <div class="mb-4">
+                    <h3 class="fw-bold mb-1">Post a New Job</h3>
+                    <p class="text-muted">Find the perfect coach for your academy.</p>
+                </div>
                 
                 <form method="POST">
-                    <div class="mb-3">
-                        <label class="form-label text-muted small">Job Title</label>
-                        <input type="text" class="form-control" name="title" value="{{ form_data.title if form_data else '' }}" required>
+                    <div class="mb-4">
+                        <label class="form-label text-muted small text-uppercase fw-bold">Job Title</label>
+                        <input type="text" class="form-control" name="title" value="{{ form_data.title if form_data else '' }}" placeholder="e.g. Head Cricket Coach" required>
                     </div>
 
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Sport</label>
+                            <label class="form-label text-muted small text-uppercase fw-bold">Sport</label>
                             <select class="form-select" name="sport">
                                 <option value="Cricket" {% if form_data and form_data.sport == 'Cricket' %}selected{% endif %}>Cricket</option>
                                 <option value="Football" {% if form_data and form_data.sport == 'Football' %}selected{% endif %}>Football</option>
@@ -43,86 +48,86 @@
                                 <option value="Athletics" {% if form_data and form_data.sport == 'Athletics' %}selected{% endif %}>Athletics</option>
                                 <option value="Swimming" {% if form_data and form_data.sport == 'Swimming' %}selected{% endif %}>Swimming</option>
                                 <option value="Kabaddi" {% if form_data and form_data.sport == 'Kabaddi' %}selected{% endif %}>Kabaddi</option>
-                                <option value="Hockey" {% if form_data and form_data.sport == 'Hockey' %}selected{% endif %}>Hockey</option>
-                                <option value="Volleyball" {% if form_data and form_data.sport == 'Volleyball' %}selected{% endif %}>Volleyball</option>
-                                <option value="Table Tennis" {% if form_data and form_data.sport == 'Table Tennis' %}selected{% endif %}>Table Tennis</option>
-                                <option value="Wrestling" {% if form_data and form_data.sport == 'Wrestling' %}selected{% endif %}>Wrestling</option>
-                                <option value="Boxing" {% if form_data and form_data.sport == 'Boxing' %}selected{% endif %}>Boxing</option>
-                                <option value="Shooting" {% if form_data and form_data.sport == 'Shooting' %}selected{% endif %}>Shooting</option>
-                                <option value="Archery" {% if form_data and form_data.sport == 'Archery' %}selected{% endif %}>Archery</option>
-                                <option value="Gymnastics" {% if form_data and form_data.sport == 'Gymnastics' %}selected{% endif %}>Gymnastics</option>
-                                <option value="Squash" {% if form_data and form_data.sport == 'Squash' %}selected{% endif %}>Squash</option>
-                                <option value="Weightlifting" {% if form_data and form_data.sport == 'Weightlifting' %}selected{% endif %}>Weightlifting</option>
-                                <option value="Judo" {% if form_data and form_data.sport == 'Judo' %}selected{% endif %}>Judo</option>
-                                <option value="Cycling" {% if form_data and form_data.sport == 'Cycling' %}selected{% endif %}>Cycling</option>
-                                <option value="Golf" {% if form_data and form_data.sport == 'Golf' %}selected{% endif %}>Golf</option>
-                                <option value="Rugby" {% if form_data and form_data.sport == 'Rugby' %}selected{% endif %}>Rugby</option>
-                                <option value="Handball" {% if form_data and form_data.sport == 'Handball' %}selected{% endif %}>Handball</option>
-                                <option value="Kho Kho" {% if form_data and form_data.sport == 'Kho Kho' %}selected{% endif %}>Kho Kho</option>
-                                <option value="Chess" {% if form_data and form_data.sport == 'Chess' %}selected{% endif %}>Chess</option>
                                 <option value="Other" {% if form_data and form_data.sport == 'Other' %}selected{% endif %}>Other</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Venue Name</label>
-                            <input type="text" class="form-control" name="location" value="{{ form_data.location if form_data else '' }}" required>
+                            <label class="form-label text-muted small text-uppercase fw-bold">Venue Name</label>
+                            <input type="text" class="form-control" name="location" value="{{ form_data.location if form_data else '' }}" placeholder="e.g. Shivaji Park Gymkhana" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4 p-3 rounded-3 border border-secondary bg-black bg-opacity-25">
+                        <div class="col-md-6">
+                            <label class="form-label text-primary small text-uppercase fw-bold"><i class="fas fa-briefcase me-2"></i>Job Category</label>
+                            <select class="form-select" name="job_type">
+                                <option value="Full Time" {% if form_data and form_data.job_type == 'Full Time' %}selected{% endif %}>Full Time</option>
+                                <option value="Part Time" {% if form_data and form_data.job_type == 'Part Time' %}selected{% endif %}>Part Time</option>
+                                <option value="Internship" {% if form_data and form_data.job_type == 'Internship' %}selected{% endif %}>Internship</option>
+                                <option value="Contract" {% if form_data and form_data.job_type == 'Contract' %}selected{% endif %}>Contract / Freelance</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-primary small text-uppercase fw-bold"><i class="fas fa-clock me-2"></i>Working Hours</label>
+                            <input type="text" class="form-control" name="working_hours" placeholder="e.g. 4 PM - 8 PM (Evening)" value="{{ form_data.working_hours if form_data else '' }}">
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label text-primary fw-bold">Pin Exact Location</label>
-                        <div class="input-group mb-1">
-                            <input type="text" id="addressInput" class="form-control" placeholder="Search Area (e.g. Shivaji Park)">
-                            <button class="btn btn-outline-light" type="button" onclick="searchAddress()" id="searchBtn">Locate</button>
+                        <label class="form-label text-muted small text-uppercase fw-bold">Pin Exact Location</label>
+                        <div class="input-group mb-2">
+                            <input type="text" id="addressInput" class="form-control" placeholder="Search Area (e.g. Bandra West)">
+                            <button class="btn btn-outline-light" type="button" onclick="searchAddress()" id="searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
                         </div>
-                        <div id="pickerMap" style="height: 250px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);"></div>
+                        <div id="pickerMap" style="height: 250px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);"></div>
                         <input type="hidden" name="lat" id="lat" value="{{ form_data.lat if form_data else '' }}">
                         <input type="hidden" name="lng" id="lng" value="{{ form_data.lng if form_data else '' }}">
                     </div>
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Description</label>
-                            <textarea class="form-control" name="description" rows="4">{{ form_data.description if form_data else '' }}</textarea>
+                            <label class="form-label text-muted small text-uppercase fw-bold">Description</label>
+                            <textarea class="form-control" name="description" rows="5" placeholder="Describe the role...">{{ form_data.description if form_data else '' }}</textarea>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Key Requirements</label>
-                            <textarea class="form-control" name="requirements" rows="4" placeholder="e.g. Must have BCCI Level 1 cert, Own transport">{{ form_data.requirements if form_data else '' }}</textarea>
+                            <label class="form-label text-muted small text-uppercase fw-bold">Key Requirements</label>
+                            <textarea class="form-control" name="requirements" rows="5" placeholder="e.g. Must have Own Transport, BCCI Level 1...">{{ form_data.requirements if form_data else '' }}</textarea>
                         </div>
-                    </div>
-
-                    <!-- SCREENING QUESTIONS -->
-                    <div class="mb-4 p-3 border border-secondary rounded bg-dark bg-opacity-25">
-                        <label class="form-label text-info fw-bold"><i class="fas fa-filter me-2"></i>Screening Questions</label>
-                        <p class="text-muted small mb-2">Candidates must answer these to apply. Separate questions with a pipe <code>|</code> symbol.</p>
-                        <textarea class="form-control" name="screening_questions" rows="2" 
-                                  placeholder="e.g. Do you have a bike? | Are you willing to travel?">{{ form_data.screening_questions if form_data else '' }}</textarea>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label text-muted small">Monthly Salary (INR)</label>
+                        <label class="form-label text-muted small text-uppercase fw-bold">Screening Questions (Optional)</label>
+                        <textarea class="form-control" name="screening_questions" rows="2" 
+                                  placeholder="Separate questions with | symbol. E.g. Do you have a bike? | Years of experience?">{{ form_data.screening_questions if form_data else '' }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small text-uppercase fw-bold">Monthly Salary (INR)</label>
                         <div class="input-group">
                             <span class="input-group-text bg-dark border-secondary text-white">₹</span>
-                            <!-- CRITICAL FIX: Prioritize AI Predicted, then Extracted, then Empty -->
                             <input type="text" class="form-control" name="salary" 
                                    placeholder="e.g. 40000" 
                                    value="{{ predicted_salary if predicted_salary else (form_data.salary if form_data else '') }}">
-                            <button class="btn btn-outline-light" type="submit" name="predict" value="true">AI Predict</button>
+                            <button class="btn btn-outline-light" type="submit" name="predict" value="true">
+                                <i class="fas fa-magic me-1"></i> AI Suggest
+                            </button>
                         </div>
                         {% if ai_reason %}
-                            <div class="mt-2 p-2 border border-info rounded bg-info bg-opacity-10">
-                                <small class="text-info"><i class="fas fa-robot me-1"></i> {{ ai_reason }}</small>
+                            <div class="mt-2 p-2 rounded bg-primary bg-opacity-10 border border-primary border-opacity-25">
+                                <small class="text-primary"><i class="fas fa-robot me-1"></i> {{ ai_reason }}</small>
                             </div>
                         {% endif %}
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2">Publish Job</button>
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold text-uppercase" style="letter-spacing: 1px;">Publish Job</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<!-- Keep the Leaflet script from previous response -->
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     var startLat = {{ form_data.lat if form_data and form_data.lat else 20.5937 }};

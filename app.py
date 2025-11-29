@@ -125,6 +125,9 @@ class Job(db.Model):
     salary_range = db.Column(db.String(100))
     posted_date = db.Column(db.DateTime, default=datetime.utcnow)
     required_skills = db.Column(db.String(300)) 
+    # NEW FIELDS
+    job_type = db.Column(db.String(50), default='Full Time') # e.g. Part Time, Internship
+    working_hours = db.Column(db.String(100)) # e.g. 40 hours/week
 
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -189,17 +192,49 @@ def calculate_ai_score(job, profile):
             score += 10
     return min(score, 100)
 
-def predict_salary_ai(sport, location, description):
+# UPDATED AI SALARY LOGIC
+def predict_salary_ai(sport, location, description, job_type):
+    # 1. Start with a Base Salary
     base = 15000
-    reason = "Base entry level for general coaching."
-    if sport.lower() == 'cricket': base += 10000; reason = "Cricket has high market demand."
-    elif sport.lower() == 'football': base += 5000; reason = "Growing demand for football academies."
-    desc_lower = description.lower()
-    if 'head coach' in desc_lower or 'senior' in desc_lower: base += 20000; reason += " + Head Coach role."
-    if 'mumbai' in location.lower() or 'delhi' in location.lower() or 'bangalore' in location.lower(): base += 10000; reason += " + Metro City adjustment."
-    return (f"{base} - {base + 10000}", reason)
+    reason = "Base entry level."
 
-# NEW: ROBUST AI PARSER
+    # 2. Adjust for Sport
+    if sport and sport.lower() == 'cricket': 
+        base += 10000
+        reason = "Cricket (High Demand)"
+    elif sport and sport.lower() == 'football': 
+        base += 5000
+        reason = "Football (Growing Demand)"
+
+    # 3. Adjust for Location (Metro Cities pay more)
+    if location and ('mumbai' in location.lower() or 'delhi' in location.lower() or 'bangalore' in location.lower()): 
+        base += 8000
+        reason += " + Metro City"
+
+    # 4. Adjust for Role Level in Description
+    desc_lower = description.lower() if description else ""
+    if 'head coach' in desc_lower or 'senior' in desc_lower: 
+        base += 15000
+        reason += " + Senior Role"
+    
+    # 5. CRITICAL: Adjust for Job Type
+    if job_type == 'Internship':
+        base = base * 0.4  # Interns get ~40% of full salary
+        reason += " (Adjusted for Internship)"
+    elif job_type == 'Part Time':
+        base = base * 0.6  # Part time gets ~60%
+        reason += " (Pro-rated for Part Time)"
+    elif job_type == 'Contract':
+        base = base * 1.2  # Contracts often pay slightly more per hour due to no benefits
+        reason += " (Contract Premium)"
+
+    # Round it to nice numbers
+    min_sal = int(base)
+    max_sal = int(base * 1.2)
+    
+    return (f"{min_sal} - {max_sal}", reason)
+
+# ROBUST AI PARSER
 def smart_parse_document(filepath):
     text = ""
     ext = filepath.rsplit('.', 1)[1].lower()
@@ -288,6 +323,11 @@ def generate_ai_resume_content(profile):
 
 # --- ROUTES ---
 
+@app.route('/plans')
+@login_required
+def show_plans():
+    return render_template('plans.html')
+
 @app.route('/job/new', methods=['GET', 'POST'])
 @login_required
 def new_job():
@@ -314,8 +354,11 @@ def new_job():
             sport = request.form.get('sport')
             location = request.form.get('location')
             description = request.form.get('description')
-            predicted_salary, ai_reason = predict_salary_ai(sport, location, description)
+            job_type = request.form.get('job_type') # Capture Job Type
+
+            predicted_salary, ai_reason = predict_salary_ai(sport, location, description, job_type)
             flash(f"AI Suggested Salary: ₹{predicted_salary}/month")
+            
             form_data = {
                 'title': request.form.get('title'),
                 'sport': request.form.get('sport'),
@@ -325,7 +368,9 @@ def new_job():
                 'screening_questions': request.form.get('screening_questions'),
                 'salary': request.form.get('salary'),
                 'lat': request.form.get('lat'),
-                'lng': request.form.get('lng')
+                'lng': request.form.get('lng'),
+                'job_type': request.form.get('job_type'),
+                'working_hours': request.form.get('working_hours')
             }
             return render_template('job_new.html', predicted_salary=predicted_salary, ai_reason=ai_reason, form_data=form_data)
         
@@ -342,6 +387,8 @@ def new_job():
             requirements=request.form.get('requirements'),
             screening_questions=request.form.get('screening_questions'),
             salary_range=request.form.get('salary'),
+            job_type=request.form.get('job_type'),         # SAVE NEW FIELDS
+            working_hours=request.form.get('working_hours'), # SAVE NEW FIELDS
             is_active=True
         )
         db.session.add(new_job)
@@ -402,6 +449,7 @@ def authorize_google():
         user = User.query.filter_by(email=user_info['email']).first()
         if user:
             login_user(user)
+            if user.role == 'employer': return redirect(url_for('show_plans'))
             return redirect(url_for('dashboard'))
         else:
             session['google_user'] = user_info
@@ -424,6 +472,7 @@ def select_role():
             db.session.commit()
         login_user(user)
         session.pop('google_user', None)
+        if user.role == 'employer': return redirect(url_for('show_plans'))
         return redirect(url_for('dashboard'))
     return render_template('select_role.html')
 
@@ -443,6 +492,7 @@ def register():
             db.session.add(Profile(user_id=new_user.id))
             db.session.commit()
         login_user(new_user)
+        if new_user.role == 'employer': return redirect(url_for('show_plans'))
         return redirect(url_for('dashboard'))
     return render_template('register.html')
 
@@ -453,6 +503,7 @@ def login():
         if user and check_password_hash(user.password, request.form.get('password')):
             login_user(user)
             if user.role == 'admin': return redirect(url_for('super_admin'))
+            if user.role == 'employer': return redirect(url_for('show_plans'))
             return redirect(url_for('dashboard'))
         flash('Invalid credentials')
     return render_template('login.html')
@@ -620,60 +671,50 @@ def resume_builder():
     if current_user.role != 'coach': return redirect(url_for('dashboard'))
     ai_summary = generate_ai_resume_content(current_user.profile)
     return render_template('resume_builder.html', profile=current_user.profile, ai_summary=ai_summary)
+
 @app.route('/profile/delete', methods=['POST'])
 @login_required
 def delete_profile():
     user = User.query.get(current_user.id)
-    
-    # Cascade delete is handled by database usually, but let's be explicit for safety
     if user.profile:
-        # Delete related reviews
         Review.query.filter_by(profile_id=user.profile.id).delete()
-        # Delete related applications
         Application.query.filter_by(user_id=user.id).delete()
         db.session.delete(user.profile)
-        
-    # Delete Jobs if employer
     if user.role == 'employer':
         Job.query.filter_by(employer_id=user.id).delete()
-        
     db.session.delete(user)
     db.session.commit()
-    
     logout_user()
     flash('Your account has been permanently deleted.')
     return redirect(url_for('home'))
+
+# --- STATIC PAGES ---
 @app.route('/about')
-def about():
-    return render_template('pages/about.html')
-
+def about(): return render_template('pages/about.html')
 @app.route('/careers')
-def careers():
-    return render_template('pages/careers.html')
-
+def careers(): return render_template('pages/careers.html')
 @app.route('/success-stories')
-def success_stories():
-    return render_template('pages/success_stories.html')
-
+def success_stories(): return render_template('pages/success_stories.html')
 @app.route('/pricing')
-def pricing():
-    return render_template('pages/pricing.html')
-
+def pricing(): return render_template('pages/pricing.html')
 @app.route('/coach-guide')
-def coach_guide():
-    return render_template('pages/coach_guide.html')
-
+def coach_guide(): return render_template('pages/coach_guide.html')
 @app.route('/academy-guide')
-def academy_guide():
-    return render_template('pages/academy_guide.html')
-
+def academy_guide(): return render_template('pages/academy_guide.html')
 @app.route('/safety')
-def safety():
-    return render_template('pages/safety.html')
-
+def safety(): return render_template('pages/safety.html')
 @app.route('/help')
-def help_center():
-    return render_template('pages/help.html')
+def help_center(): return render_template('pages/help.html')
+
+# --- ERROR HANDLERS ---
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error.html', error_code=404), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('error.html', error_code=500), 500
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
