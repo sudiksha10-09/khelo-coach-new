@@ -2,118 +2,80 @@
 
 {% block content %}
 
-<!-- HERO SECTION -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8 hero-content">
-                <h1 class="hero-title fade-in">
-                    Find Your Perfect<br>
-                    <span style="color: rgba(255, 255, 255, 0.95);">Sports Career Match</span>
-                </h1>
-                <p class="hero-subtitle fade-in-delay-1">
-                    India's first AI-powered recruitment platform connecting talented coaches with premier academies. Built on trust, powered by data.
-                </p>
-                <div class="fade-in-delay-2" style="margin-top: 2.5rem;">
-                    {% if not current_user.is_authenticated %}
-                        <a href="{{ url_for('register') }}" class="btn btn-white btn-lg btn-icon me-3">
-                            <i class="fas fa-rocket"></i>
-                            Get Started Free
-                        </a>
-                        <a href="#how-it-works" class="btn btn-outline-primary btn-lg" style="background: rgba(255, 255, 255, 0.1); color: white; border-color: white;">
-                            Learn More
-                        </a>
-                    {% else %}
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-white btn-lg btn-icon">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Go to Dashboard
-                        </a>
-                    {% endif %}
-                </div>
+<!-- HERO SECTION (Updated with Visual) -->
+<section class="hero-brutal">
+    
+    <h1 class="brutal-text text-back glide-up">KOACH</h1>
 
-                <!-- Hero Stats -->
-                <div class="hero-stats fade-in-delay-3">
-                    <div class="stat-item">
-                        <span class="stat-number" data-target="500">500+</span>
-                        <span class="stat-label">Active Coaches</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" data-target="120">120+</span>
-                        <span class="stat-label">Partner Academies</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" data-target="98">98%</span>
-                        <span class="stat-label">Match Rate</span>
-                    </div>
-                </div>
-            </div>
+    <img src="{{ url_for('static', filename='images/coach_cutout.png') }}" 
+         alt="Coach Athlete" 
+         class="hero-cutout-img glide-up"
+         style="transition-delay: 0.1s;">
+
+    <h1 class="brutal-text text-front glide-up" style="transition-delay: 0.2s;">SMART</h1>
+
+    <div class="brutal-content-layer glide-up" style="transition-delay: 0.3s;">
+        <p class="mb-4">India's First AI-Powered Sports Recruitment Platform</p>
+        
+        <div class="d-flex justify-content-center gap-3">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg btn-biometric shadow-lg">
+                    <i class="fas fa-rocket me-2"></i> Get Started
+                </a>
+                <a href="#how-it-works" class="btn btn-light btn-lg shadow-md border">
+                    Learn More
+                </a>
+            {% else %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg btn-biometric shadow-lg">
+                    Go to Dashboard
+                </a>
+            {% endif %}
         </div>
     </div>
+
 </section>
 
-<!-- USER SEGMENT SECTION -->
-<section class="segment-section">
+<!-- SEGMENT SECTION -->
+<section class="segment-section py-5 bg-light">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title fade-in">Who Are You?</h2>
-            <p class="section-subtitle fade-in-delay-1">Choose your path and discover opportunities</p>
+        <div class="text-center mb-5 glide-up">
+            <h2 class="section-title">Who Are You?</h2>
+            <p class="section-subtitle">Choose your path and discover opportunities</p>
         </div>
-
         <div class="row g-4">
-            <!-- FOR COACHES -->
-            <div class="col-lg-6 fade-in-delay-1">
-                <div class="segment-card">
-                    <div class="segment-icon">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
+            <!-- Coaches -->
+            <div class="col-md-6">
+                <div class="segment-card glide-up" style="transition-delay: 0.1s;">
+                    <div class="segment-icon"><i class="fas fa-user-tie"></i></div>
                     <h3>For Coaches</h3>
-                    <p>Build your profile, showcase your skills through video resumes, and get discovered by top academies across India.</p>
-                    
-                    <ul class="feature-list">
+                    <p>Build your brand. Get discovered by top academies.</p>
+                    <ul class="feature-list mb-4">
                         <li>Create AI-powered video resume</li>
                         <li>Get verified with trust badge</li>
                         <li>Access 100+ job opportunities</li>
-                        <li>Smart job matching algorithm</li>
-                        <li>Direct academy connections</li>
                     </ul>
-
                     {% if not current_user.is_authenticated %}
-                        <a href="{{ url_for('register') }}?role=coach" class="btn btn-primary btn-lg w-100 mt-3">
-                            Join as Coach <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
+                        <a href="{{ url_for('register') }}?role=coach" class="btn btn-primary w-100 btn-biometric">Join as Coach</a>
                     {% else %}
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg w-100 mt-3">
-                            View Dashboard <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary w-100 btn-biometric">View Dashboard</a>
                     {% endif %}
                 </div>
             </div>
-
-            <!-- FOR ACADEMIES -->
-            <div class="col-lg-6 fade-in-delay-2">
-                <div class="segment-card">
-                    <div class="segment-icon" style="background: linear-gradient(135deg, var(--accent-orange), #dc2626);">
-                        <i class="fas fa-building"></i>
-                    </div>
+            <!-- Academies -->
+            <div class="col-md-6">
+                <div class="segment-card glide-up" style="transition-delay: 0.2s;">
+                    <div class="segment-icon" style="background: linear-gradient(135deg, var(--accent-orange), #dc2626);"><i class="fas fa-building"></i></div>
                     <h3>For Academies</h3>
-                    <p>Find verified, talented coaches quickly. Post jobs, review video profiles, and hire with confidence using our AI insights.</p>
-                    
-                    <ul class="feature-list">
+                    <p>Hire verified talent with AI matching instantly.</p>
+                    <ul class="feature-list mb-4">
                         <li>Access verified coach database</li>
                         <li>AI-powered candidate matching</li>
                         <li>Post unlimited job openings</li>
-                        <li>Watch video resumes instantly</li>
-                        <li>Background verification included</li>
                     </ul>
-
                     {% if not current_user.is_authenticated %}
-                        <a href="{{ url_for('register') }}?role=employer" class="btn btn-lg w-100 mt-3" style="background: linear-gradient(135deg, var(--accent-orange), #dc2626); color: white;">
-                            Join as Academy <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
+                        <a href="{{ url_for('register') }}?role=employer" class="btn btn-primary w-100 btn-biometric" style="background: var(--accent-orange);">Join as Academy</a>
                     {% else %}
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-lg w-100 mt-3" style="background: linear-gradient(135deg, var(--accent-orange), #dc2626); color: white;">
-                            View Dashboard <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary w-100 btn-biometric" style="background: var(--accent-orange);">View Dashboard</a>
                     {% endif %}
                 </div>
             </div>
@@ -121,195 +83,208 @@
     </div>
 </section>
 
-<!-- HOW IT WORKS SECTION (UPDATED WITH TOGGLE) -->
-<section class="how-it-works" id="how-it-works">
+<!-- HOW IT WORKS (Flipping Cards + Toggle) -->
+<section class="how-it-works py-5" id="how-it-works">
     <div class="container">
-        <div class="text-center mb-4">
-            <h2 class="section-title fade-in">How It Works</h2>
-            <p class="section-subtitle fade-in-delay-1">Simple steps to success on KoachSmart</p>
+        <div class="text-center mb-4 glide-up">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Simple steps to success (Hover cards to flip)</p>
         </div>
 
         <!-- TOGGLE SWITCH -->
-        <div class="d-flex justify-content-center mb-5 fade-in-delay-2">
-            <div class="glass-card p-1 d-inline-flex rounded-pill" style="border: 1px solid var(--glass-border);">
-                <button class="btn btn-primary rounded-pill px-4 py-2" id="btn-coach" onclick="toggleSteps('coach')">For Coaches</button>
-                <button class="btn btn-outline-light border-0 rounded-pill px-4 py-2 text-muted" id="btn-academy" onclick="toggleSteps('academy')">For Academies</button>
+        <div class="d-flex justify-content-center mb-5 glide-up" style="transition-delay: 0.1s;">
+            <div class="glass-card p-1 d-inline-flex rounded-pill" style="border: 1px solid var(--border-color); background: white;">
+                <button class="btn btn-primary rounded-pill px-4 py-2 shadow-sm" id="btn-coach" onclick="toggleSteps('coach')">For Coaches</button>
+                <button class="btn btn-outline-dark border-0 rounded-pill px-4 py-2 text-muted" id="btn-academy" onclick="toggleSteps('academy')">For Academies</button>
             </div>
         </div>
 
-        <!-- COACH STEPS (Default Visible) -->
+        <!-- COACH STEPS -->
         <div id="coach-steps" class="row g-4">
-            <div class="col-lg-3 col-md-6 fade-in-delay-1">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <div class="step-icon"><i class="fas fa-user-plus"></i></div>
-                    <h4>Create Profile</h4>
-                    <p>Sign up in 2 minutes and build your comprehensive profile with certifications.</p>
+            <!-- Step 1 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up" style="transition-delay: 0.1s;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3">1</div>
+                            <h4>Create Profile</h4>
+                            <i class="fas fa-user-plus text-primary fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>Sign Up</h4>
+                            <p class="small">Sign up in 2 minutes. Add your certifications, experience, and sports preferences.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-2">
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <div class="step-icon"><i class="fas fa-video"></i></div>
-                    <h4>Upload Video</h4>
-                    <p>Record a coaching video resume to showcase your skills and personality.</p>
+            <!-- Step 2 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up" style="transition-delay: 0.2s;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3">2</div>
+                            <h4>Upload Video</h4>
+                            <i class="fas fa-video text-primary fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>Showcase Skills</h4>
+                            <p class="small">Record a coaching video resume to showcase your skills and personality.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-3">
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <div class="step-icon"><i class="fas fa-shield-alt"></i></div>
-                    <h4>Get Verified</h4>
-                    <p>Upload documents and earn your trust badge to stand out to employers.</p>
+            <!-- Step 3 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up" style="transition-delay: 0.3s;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3">3</div>
+                            <h4>Get Verified</h4>
+                            <i class="fas fa-shield-alt text-primary fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>Earn Trust</h4>
+                            <p class="small">Upload documents for verification and earn your trust badge to stand out.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-4">
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <div class="step-icon"><i class="fas fa-handshake"></i></div>
-                    <h4>Get Hired</h4>
-                    <p>Apply to jobs, connect with academies, and land your dream position.</p>
+            <!-- Step 4 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up" style="transition-delay: 0.4s;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3">4</div>
+                            <h4>Get Hired</h4>
+                            <i class="fas fa-handshake text-primary fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>Connect</h4>
+                            <p class="small">Apply to jobs, connect with academies, and land your dream position.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- ACADEMY STEPS (Hidden by default) -->
         <div id="academy-steps" class="row g-4" style="display: none;">
-            <div class="col-lg-3 col-md-6 fade-in-delay-1">
-                <div class="step-card">
-                    <div class="step-number" style="background: var(--accent-orange);">1</div>
-                    <div class="step-icon"><i class="fas fa-file-upload"></i></div>
-                    <h4>Post a Job</h4>
-                    <p>Use our AI Auto-Fill to upload a PDF description or post requirements in seconds.</p>
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3" style="background: var(--accent-orange);">1</div>
+                            <h4>Post a Job</h4>
+                            <i class="fas fa-file-upload text-warning fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back" style="background: linear-gradient(135deg, var(--accent-orange), #ea580c);">
+                            <h4>AI Auto-Fill</h4>
+                            <p class="small">Use our AI Auto-Fill to upload a PDF description or post requirements in seconds.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-2">
-                <div class="step-card">
-                    <div class="step-number" style="background: var(--accent-orange);">2</div>
-                    <div class="step-icon"><i class="fas fa-filter"></i></div>
-                    <h4>Smart Screening</h4>
-                    <p>Our AI ranks candidates by skill match score, saving you hours of manual review.</p>
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up" style="transition-delay: 0.1s;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3" style="background: var(--accent-orange);">2</div>
+                            <h4>Smart Screen</h4>
+                            <i class="fas fa-filter text-warning fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back" style="background: linear-gradient(135deg, var(--accent-orange), #ea580c);">
+                            <h4>AI Ranking</h4>
+                            <p class="small">Our AI ranks candidates by skill match score, saving you hours of review.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-3">
-                <div class="step-card">
-                    <div class="step-number" style="background: var(--accent-orange);">3</div>
-                    <div class="step-icon"><i class="fas fa-play-circle"></i></div>
-                    <h4>Video Review</h4>
-                    <p>Don't guess. Watch coaching drills directly on the platform to assess technique.</p>
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up" style="transition-delay: 0.2s;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3" style="background: var(--accent-orange);">3</div>
+                            <h4>Video Review</h4>
+                            <i class="fas fa-play-circle text-warning fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back" style="background: linear-gradient(135deg, var(--accent-orange), #ea580c);">
+                            <h4>See Skills</h4>
+                            <p class="small">Don't guess. Watch coaching drills directly on the platform to assess technique.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-4">
-                <div class="step-card">
-                    <div class="step-number" style="background: var(--accent-orange);">4</div>
-                    <div class="step-icon"><i class="fas fa-user-check"></i></div>
-                    <h4>Hire Fast</h4>
-                    <p>Shortlist candidates, schedule interviews, and onboard verified talent instantly.</p>
+            <div class="col-lg-3 col-md-6">
+                <div class="flip-card-wrapper glide-up" style="transition-delay: 0.3s;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="step-number mb-3" style="background: var(--accent-orange);">4</div>
+                            <h4>Hire Fast</h4>
+                            <i class="fas fa-user-check text-warning fs-2 mt-3"></i>
+                        </div>
+                        <div class="flip-card-back" style="background: linear-gradient(135deg, var(--accent-orange), #ea580c);">
+                            <h4>Onboard</h4>
+                            <p class="small">Shortlist candidates, schedule interviews, and onboard verified talent instantly.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-    </div>
-</section>
-
-<!-- STATS SECTION -->
-<section class="stats-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 col-md-6 fade-in">
-                <div class="stat-box">
-                    <h3>500+</h3>
-                    <p>Active Coaches</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-1">
-                <div class="stat-box">
-                    <h3>120+</h3>
-                    <p>Partner Academies</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-2">
-                <div class="stat-box">
-                    <h3>1,200+</h3>
-                    <p>Successful Placements</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-3">
-                <div class="stat-box">
-                    <h3>98%</h3>
-                    <p>Satisfaction Rate</p>
-                </div>
-            </div>
-        </div>
     </div>
 </section>
 
 <!-- TESTIMONIALS SECTION -->
-<section class="testimonials-section" id="testimonials">
+<section class="testimonials-section py-5">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title fade-in">Success Stories</h2>
-            <p class="section-subtitle fade-in-delay-1">Real coaches, real results</p>
+        <div class="text-center mb-5 glide-up">
+            <h2 class="section-title">Success Stories</h2>
+            <p class="section-subtitle">Real coaches, real results</p>
         </div>
-
         <div class="row g-4">
             <!-- Testimonial 1 -->
-            <div class="col-lg-4 col-md-6 fade-in-delay-1">
+            <div class="col-lg-4 col-md-6 glide-up" style="transition-delay: 0.1s;">
                 <div class="testimonial-card">
                     <div class="testimonial-header">
-                        <div class="testimonial-photo">
-                            <i class="fas fa-user"></i>
-                        </div>
+                        <div class="testimonial-photo"><i class="fas fa-user"></i></div>
                         <div class="testimonial-info">
                             <h5>Rajesh Kumar</h5>
                             <p>Cricket Coach • Mumbai</p>
                         </div>
                     </div>
-                    <p class="testimonial-text">
-                        "I got hired within 2 weeks of creating my profile. The video resume feature really helped me stand out. The academy loved seeing my coaching style before the interview!"
-                    </p>
+                    <p class="testimonial-text">"I got hired within 2 weeks. The video resume feature really helped me stand out. The academy loved seeing my coaching style!"</p>
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                 </div>
             </div>
-
             <!-- Testimonial 2 -->
-            <div class="col-lg-4 col-md-6 fade-in-delay-2">
+            <div class="col-lg-4 col-md-6 glide-up" style="transition-delay: 0.2s;">
                 <div class="testimonial-card">
                     <div class="testimonial-header">
-                        <div class="testimonial-photo" style="background: linear-gradient(135deg, var(--accent-orange), #dc2626);">
-                            <i class="fas fa-user"></i>
-                        </div>
+                        <div class="testimonial-photo" style="background: linear-gradient(135deg, var(--accent-orange), #dc2626);"><i class="fas fa-user"></i></div>
                         <div class="testimonial-info">
                             <h5>Priya Sharma</h5>
                             <p>Badminton Coach • Bangalore</p>
                         </div>
                     </div>
-                    <p class="testimonial-text">
-                        "The verification badge gave me credibility instantly. Academies trust KoachSmarT-Recruit, and it shows. I've received 5 interview calls in my first month!"
-                    </p>
+                    <p class="testimonial-text">"The verification badge gave me credibility instantly. Academies trust KoachSmarT-Recruit, and it shows."</p>
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                 </div>
             </div>
-
             <!-- Testimonial 3 -->
-            <div class="col-lg-4 col-md-6 fade-in-delay-3">
+            <div class="col-lg-4 col-md-6 glide-up" style="transition-delay: 0.3s;">
                 <div class="testimonial-card">
                     <div class="testimonial-header">
-                        <div class="testimonial-photo" style="background: linear-gradient(135deg, var(--accent-green), #059669);">
-                            <i class="fas fa-building"></i>
-                        </div>
+                        <div class="testimonial-photo" style="background: linear-gradient(135deg, var(--accent-green), #059669);"><i class="fas fa-building"></i></div>
                         <div class="testimonial-info">
                             <h5>Elite Sports Academy</h5>
                             <p>Delhi NCR</p>
                         </div>
                     </div>
-                    <p class="testimonial-text">
-                        "As an academy, finding verified coaches was always a challenge. KoachSmarT-Recruit's AI matching saved us weeks of screening. We hired 3 excellent coaches in a month!"
-                    </p>
+                    <p class="testimonial-text">"KoachSmarT's AI matching saved us weeks of screening. We hired 3 excellent coaches in a month!"</p>
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
@@ -320,40 +295,39 @@
 </section>
 
 <!-- TECHNOLOGY SECTION -->
-<section class="tech-section">
+<section class="tech-section py-5 bg-white">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title fade-in">Why Choose KoachSmarT-Recruit?</h2>
-            <p class="section-subtitle fade-in-delay-1">Built with cutting-edge technology for trust and efficiency</p>
+        <div class="text-center mb-5 glide-up">
+            <h2 class="section-title">Why Choose KoachSmarT?</h2>
+            <p class="section-subtitle">Built with cutting-edge technology for trust</p>
         </div>
-
         <div class="row g-4">
-            <div class="col-lg-3 col-md-6 fade-in-delay-1">
+            <div class="col-lg-3 col-md-6 glide-up" style="transition-delay: 0.1s;">
                 <div class="tech-card">
                     <div class="tech-icon"><i class="fas fa-brain"></i></div>
                     <h4>AI Matching</h4>
-                    <p>Smart algorithms match coaches with academies based on 50+ data points</p>
+                    <p>Smart algorithms match coaches based on 50+ data points</p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-2">
+            <div class="col-lg-3 col-md-6 glide-up" style="transition-delay: 0.2s;">
                 <div class="tech-card">
                     <div class="tech-icon"><i class="fas fa-video"></i></div>
                     <h4>Video Resumes</h4>
-                    <p>Showcase your personality and coaching style through engaging video profiles</p>
+                    <p>Showcase your personality and coaching style engagingly</p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-3">
+            <div class="col-lg-3 col-md-6 glide-up" style="transition-delay: 0.3s;">
                 <div class="tech-card">
                     <div class="tech-icon"><i class="fas fa-shield-alt"></i></div>
                     <h4>Verified Trust</h4>
                     <p>Background checks and document verification for peace of mind</p>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 fade-in-delay-4">
+            <div class="col-lg-3 col-md-6 glide-up" style="transition-delay: 0.4s;">
                 <div class="tech-card">
                     <div class="tech-icon"><i class="fas fa-bolt"></i></div>
                     <h4>Instant Connect</h4>
-                    <p>Direct messaging and quick interview scheduling to speed up hiring</p>
+                    <p>Direct messaging and quick interview scheduling</p>
                 </div>
             </div>
         </div>
@@ -365,13 +339,12 @@
 <section class="cta-section">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
+            <div class="col-lg-8 text-center glide-up">
                 <h2 class="fade-in">Ready to Transform Your Sports Career?</h2>
                 <p class="fade-in-delay-1">Join thousands of coaches and academies already using KoachSmarT-Recruit</p>
-                <div class="fade-in-delay-2">
-                    <a href="{{ url_for('register') }}" class="btn btn-white btn-lg btn-icon me-3">
-                        <i class="fas fa-rocket"></i>
-                        Get Started Free
+                <div class="fade-in-delay-2 mt-4">
+                    <a href="{{ url_for('register') }}" class="btn btn-white btn-lg btn-icon me-3 btn-biometric">
+                        <i class="fas fa-rocket text-primary"></i> Get Started Free
                     </a>
                     <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg" style="background: rgba(255, 255, 255, 0.1); color: white; border-color: white;">
                         Sign In
@@ -383,7 +356,22 @@
 </section>
 {% endif %}
 
+<!-- INTERSECTION OBSERVER & TOGGLE LOGIC -->
 <script>
+    // 1. Glide Reveal Observer
+    document.addEventListener("DOMContentLoaded", function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.glide-up').forEach((el) => observer.observe(el));
+    });
+
+    // 2. Toggle Steps Logic (Fixed)
     function toggleSteps(role) {
         const coachSteps = document.getElementById('coach-steps');
         const academySteps = document.getElementById('academy-steps');
@@ -394,20 +382,20 @@
             coachSteps.style.display = 'flex';
             academySteps.style.display = 'none';
             
-            btnCoach.classList.add('btn-primary');
-            btnCoach.classList.remove('btn-outline-light', 'text-muted');
+            btnCoach.classList.add('btn-primary', 'shadow-sm');
+            btnCoach.classList.remove('btn-outline-dark', 'text-muted', 'border-0');
             
-            btnAcademy.classList.remove('btn-primary');
-            btnAcademy.classList.add('btn-outline-light', 'text-muted');
+            btnAcademy.classList.remove('btn-primary', 'shadow-sm');
+            btnAcademy.classList.add('btn-outline-dark', 'text-muted', 'border-0');
         } else {
             coachSteps.style.display = 'none';
             academySteps.style.display = 'flex';
             
-            btnAcademy.classList.add('btn-primary');
-            btnAcademy.classList.remove('btn-outline-light', 'text-muted');
+            btnAcademy.classList.add('btn-primary', 'shadow-sm');
+            btnAcademy.classList.remove('btn-outline-dark', 'text-muted', 'border-0');
             
-            btnCoach.classList.remove('btn-primary');
-            btnCoach.classList.add('btn-outline-light', 'text-muted');
+            btnCoach.classList.remove('btn-primary', 'shadow-sm');
+            btnCoach.classList.add('btn-outline-dark', 'text-muted', 'border-0');
         }
     }
 </script>

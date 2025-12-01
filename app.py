@@ -13,12 +13,16 @@ from flask_mail import Mail, Message
 from dotenv import load_dotenv
 import PyPDF2
 import docx
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-key') 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///khelo_coach.db'
+
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # --- FOLDERS ---
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -139,6 +143,18 @@ class Application(db.Model):
     custom_resume_path = db.Column(db.String(300))
     screening_answers = db.Column(db.Text)
     job = db.relationship('Job', backref='applications')
+
+# --- CHAT MODEL ---
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+    
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+    receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_messages')
 
 # --- HELPERS ---
 @login_manager.user_loader
@@ -450,6 +466,7 @@ def authorize_google():
         if user:
             login_user(user)
             if user.role == 'employer': return redirect(url_for('show_plans'))
+            if user.role == 'coach': return redirect(url_for('show_plans'))
             return redirect(url_for('dashboard'))
         else:
             session['google_user'] = user_info
@@ -473,6 +490,7 @@ def select_role():
         login_user(user)
         session.pop('google_user', None)
         if user.role == 'employer': return redirect(url_for('show_plans'))
+        if user.role == 'coach': return redirect(url_for('show_plans'))
         return redirect(url_for('dashboard'))
     return render_template('select_role.html')
 
@@ -493,6 +511,7 @@ def register():
             db.session.commit()
         login_user(new_user)
         if new_user.role == 'employer': return redirect(url_for('show_plans'))
+        if new_user.role == 'coach': return redirect(url_for('show_plans'))
         return redirect(url_for('dashboard'))
     return render_template('register.html')
 
@@ -500,12 +519,22 @@ def register():
 def login():
     if request.method == 'POST':
         user = User.query.filter_by(email=request.form.get('email')).first()
-        if user and check_password_hash(user.password, request.form.get('password')):
+        
+        # 1. FIX: Check if user.password is NOT None before checking hash
+        if user and user.password and check_password_hash(user.password, request.form.get('password')):
             login_user(user)
             if user.role == 'admin': return redirect(url_for('super_admin'))
             if user.role == 'employer': return redirect(url_for('show_plans'))
+            if user.role == 'coach': return redirect(url_for('show_plans'))
             return redirect(url_for('dashboard'))
-        flash('Invalid credentials')
+            
+        # 2. Handle Google Users trying to use password
+        elif user and not user.password:
+            flash('This account was created with Google. Please use "Login with Google".')
+            
+        else:
+            flash('Invalid credentials')
+            
     return render_template('login.html')
 
 @app.route('/logout')
@@ -687,13 +716,13 @@ def delete_profile():
     logout_user()
     flash('Your account has been permanently deleted.')
     return redirect(url_for('home'))
+
+# --- EDIT JOB ROUTE ---
 @app.route('/job/edit/<int:job_id>', methods=['GET', 'POST'])
 @login_required
 def edit_job(job_id):
     if current_user.role != 'employer': return redirect(url_for('dashboard'))
     job = Job.query.get_or_404(job_id)
-    
-    # Security Check: Ensure the logged-in user owns this job
     if job.employer_id != current_user.id:
         flash("Unauthorized access!")
         return redirect(url_for('dashboard'))
@@ -709,7 +738,6 @@ def edit_job(job_id):
         job.job_type = request.form.get('job_type')
         job.working_hours = request.form.get('working_hours')
         
-        # Only update coords if user actually picked a new point
         lat = request.form.get('lat')
         lng = request.form.get('lng')
         if lat and lng and lat.strip() != '' and lng.strip() != '':
@@ -720,8 +748,6 @@ def edit_job(job_id):
         flash("Job Updated Successfully!")
         return redirect(url_for('dashboard'))
     
-    # We use a separate template for editing, or reuse job_new with context
-    # ideally create templates/job_edit.html (code provided in previous response)
     return render_template('job_edit.html', job=job)
 
 # --- FORGOT PASSWORD ROUTES ---
@@ -743,6 +769,62 @@ def reset_password_mock():
         flash("Your password has been reset! Please login.")
         return redirect(url_for('login'))
     return render_template('reset_password.html')
+
+# --- CHAT ROUTES ---
+@app.route('/chat')
+@app.route('/chat/<int:receiver_id>')
+@login_required
+def chat(receiver_id=None):
+    contacts = []
+    if current_user.role == 'employer':
+        # Employer sees applicants
+        my_jobs = Job.query.filter_by(employer_id=current_user.id).all()
+        job_ids = [j.id for j in my_jobs]
+        apps = Application.query.filter(Application.job_id.in_(job_ids)).all()
+        contacts = list(set([app.applicant for app in apps]))
+    else:
+        # Coach sees employers
+        my_apps = Application.query.filter_by(user_id=current_user.id).all()
+        contacts = list(set([app.job.employer for app in my_apps]))
+
+    active_contact = None
+    messages = []
+    room = None
+
+    if receiver_id:
+        active_contact = User.query.get_or_404(receiver_id)
+        user_ids = sorted([current_user.id, receiver_id])
+        room = f"chat_{user_ids[0]}_{user_ids[1]}"
+        messages = Message.query.filter(
+            ((Message.sender_id == current_user.id) & (Message.receiver_id == receiver_id)) |
+            ((Message.sender_id == receiver_id) & (Message.receiver_id == current_user.id))
+        ).order_by(Message.timestamp.asc()).all()
+
+    return render_template('chat.html', contacts=contacts, active_contact=active_contact, messages=messages, room=room)
+
+# --- SOCKET EVENTS ---
+@socketio.on('join')
+def on_join(data):
+    room = data['room']
+    join_room(room)
+
+@socketio.on('send_message')
+def handle_send_message_event(data):
+    content = data['message']
+    receiver_id = data['receiver_id']
+    room = data['room']
+    
+    new_msg = Message(sender_id=current_user.id, receiver_id=receiver_id, content=content)
+    db.session.add(new_msg)
+    db.session.commit()
+    
+    emit('receive_message', {
+        'content': content,
+        'sender_id': current_user.id,
+        'timestamp': new_msg.timestamp.strftime('%H:%M'),
+        'sender_name': current_user.username
+    }, room=room)
+
 # --- STATIC PAGES ---
 @app.route('/about')
 def about(): return render_template('pages/about.html')
@@ -773,4 +855,5 @@ def internal_server_error(e):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    # USE SOCKETIO RUN
+    socketio.run(app, debug=True)

@@ -3,184 +3,132 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-9">
-            <div class="glass-card p-4 p-md-5">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-bold text-white">Edit Profile</h3>
-                    {% if profile.is_verified %}
-                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Verified</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Unverified</span>
-                    {% endif %}
-                </div>
+        <div class="col-lg-8">
+            
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark m-0">Edit Profile</h2>
+                {% if profile.is_verified %}
+                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Verified Coach</span>
+                {% else %}
+                    <span class="badge bg-secondary"><i class="fas fa-clock me-1"></i> Unverified</span>
+                {% endif %}
+            </div>
 
-                <form method="POST" enctype="multipart/form-data">
-                    
-                    <!-- 1. IDENTITY & LOCATION -->
-                    <h5 class="text-primary mb-3 border-bottom border-secondary pb-2">Identity & Location</h5>
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-3 text-center">
-                            <!-- Image Upload (Same as before) -->
-                            <div class="position-relative d-inline-block">
-                                {% if current_user.profile_pic %}
-                                    <img src="{{ current_user.profile_pic }}" class="rounded-circle border border-primary p-1" width="100" height="100" style="object-fit: cover;">
-                                {% else %}
-                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto text-white fw-bold display-6" style="width: 100px; height: 100px;">
-                                        {{ profile.full_name[0]|upper if profile.full_name else 'U' }}
-                                    </div>
-                                {% endif %}
-                                <label class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-camera"></i>
-                                    <input type="file" name="profile_image" accept="image/*" hidden onchange="this.form.submit()">
-                                </label>
-                            </div>
+            <!-- MAIN FORM (Profile Data) -->
+            <form method="POST" enctype="multipart/form-data" class="mb-5">
+                
+                <!-- SECTION 1: IDENTITY & LOCATION -->
+                <div class="glass-card p-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-map-marker-alt me-2"></i>Identity & Location</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Full Name</label>
+                            <input type="text" class="form-control" name="full_name" value="{{ profile.full_name or '' }}" required>
                         </div>
-                        <div class="col-md-9">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small">Full Name</label>
-                                    <input type="text" class="form-control" name="full_name" value="{{ profile.full_name or '' }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small">Phone Number</label>
-                                    <input type="tel" class="form-control" name="phone" value="{{ profile.phone or '' }}" placeholder="+91...">
-                                </div>
-                                <!-- NEW LOCATION FIELDS -->
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small">Current City</label>
-                                    <input type="text" class="form-control" name="city" value="{{ profile.city or '' }}" placeholder="e.g. Mumbai">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small">Travel Willingness</label>
-                                    <select class="form-select" name="travel_range">
-                                        <option value="5km" {% if profile.travel_range == '5km' %}selected{% endif %}>Up to 5km</option>
-                                        <option value="20km" {% if profile.travel_range == '20km' %}selected{% endif %}>Within City (20km)</option>
-                                        <option value="State" {% if profile.travel_range == 'State' %}selected{% endif %}>State-wide</option>
-                                        <option value="National" {% if profile.travel_range == 'National' %}selected{% endif %}>Anywhere in India</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" value="{{ profile.phone or '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Current City</label>
+                            <input type="text" class="form-control" name="city" value="{{ profile.city or '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Travel Willingness</label>
+                            <select class="form-select" name="travel_range">
+                                <option value="Up to 5km" {% if profile.travel_range == 'Up to 5km' %}selected{% endif %}>Up to 5km</option>
+                                <option value="Within City (20km)" {% if profile.travel_range == 'Within City (20km)' %}selected{% endif %}>Within City (20km)</option>
+                                <option value="State-wide" {% if profile.travel_range == 'State-wide' %}selected{% endif %}>State-wide</option>
+                                <option value="Anywhere in India" {% if profile.travel_range == 'Anywhere in India' %}selected{% endif %}>Anywhere in India</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Profile Picture</label>
+                            <input type="file" class="form-control" name="profile_image" accept="image/*">
                         </div>
                     </div>
+                </div>
 
-                    <!-- 2. SPORTS & EXPERIENCE -->
-                    <h5 class="text-primary mb-3 border-bottom border-secondary pb-2 pt-2">Professional Details</h5>
-                    <div class="row g-3 mb-4">
+                <!-- SECTION 2: PROFESSIONAL DETAILS -->
+                <div class="glass-card p-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-trophy me-2"></i>Professional Details</h5>
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Primary Sport</label>
+                            <label class="form-label fw-bold small text-muted">Primary Sport</label>
                             <select class="form-select" name="sport">
                                 <option value="Cricket" {% if profile.sport == 'Cricket' %}selected{% endif %}>Cricket</option>
                                 <option value="Football" {% if profile.sport == 'Football' %}selected{% endif %}>Football</option>
                                 <option value="Tennis" {% if profile.sport == 'Tennis' %}selected{% endif %}>Tennis</option>
                                 <option value="Basketball" {% if profile.sport == 'Basketball' %}selected{% endif %}>Basketball</option>
-                                <!-- Add other sports as per previous list -->
+                                <option value="Badminton" {% if profile.sport == 'Badminton' %}selected{% endif %}>Badminton</option>
+                                <option value="Other" {% if profile.sport == 'Other' %}selected{% endif %}>Other</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small">Years of Experience</label>
-                            <input type="number" class="form-control" name="experience_years" id="expYears" value="{{ profile.experience_years or 0 }}" min="0">
+                            <label class="form-label fw-bold small text-muted">Years of Experience</label>
+                            <input type="number" class="form-control" name="experience_years" value="{{ profile.experience_years or 0 }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Experience Proof (PDF/Image)</label>
+                            <input type="file" class="form-control" name="experience_proof">
+                            {% if profile.experience_proof_path %}
+                                <small class="text-success"><i class="fas fa-check me-1"></i> File Uploaded</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Certifications</label>
+                            <input type="text" class="form-control" name="certifications" placeholder="e.g. BCCI Level 1, NIS Diploma" value="{{ profile.certifications or '' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Certification Proof</label>
+                            <input type="file" class="form-control" name="cert_proof">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Bio / Coaching Philosophy</label>
+                            <textarea class="form-control" name="bio" rows="4">{{ profile.bio or '' }}</textarea>
                         </div>
                     </div>
+                </div>
 
-                    <!-- EXPERIENCE PROOF (Same as before) -->
-                    <div class="mb-4 p-3 border border-secondary rounded bg-dark bg-opacity-25" id="expProofSection">
-                        <label class="form-label text-warning fw-bold mb-1"><i class="fas fa-file-contract me-2"></i>Experience Proof</label>
-                        <p class="text-muted small mb-2">Required if you have experience.</p>
-                        <input type="file" class="form-control form-control-sm" name="experience_proof" accept=".pdf,.jpg,.png">
-                    </div>
-
-                    <!-- CERTIFICATIONS WITH AUTOCOMPLETE -->
-                    <div class="mb-3">
-                        <label class="form-label text-muted small">Certifications (Type to search)</label>
-                        <input type="text" class="form-control" name="certifications" list="certList" 
-                               value="{{ profile.certifications or '' }}" 
-                               placeholder="Start typing (e.g. BCCI...)">
-                        <datalist id="certList">
-                            <option value="BCCI Level 1 Coach">
-                            <option value="BCCI Level 2 Coach">
-                            <option value="BCCI Level 3 Coach">
-                            <option value="AIFF D License">
-                            <option value="AIFF C License">
-                            <option value="AFC B License">
-                            <option value="AFC A License">
-                            <option value="NIS Diploma in Coaching">
-                            <option value="BWF Level 1 (Badminton)">
-                            <option value="FIBA Level 1 (Basketball)">
-                            <option value="ITF Level 1 (Tennis)">
-                            <option value="ASCA Level 1 (Swimming)">
-                        </datalist>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-muted small">Bio / Coaching Philosophy</label>
-                        <textarea class="form-control" name="bio" rows="3">{{ profile.bio or '' }}</textarea>
-                    </div>
-
-                    <!-- 3. DOCUMENTS & ID -->
-                    <h5 class="text-warning mb-3 border-bottom border-secondary pb-2 pt-2">Identity & Documents</h5>
-                    
-                    <div class="row g-3 mb-4">
-                        <!-- ID PROOF WITH PRIVACY NOTE -->
-                        <div class="col-md-12">
-                            <div class="p-3 border border-warning rounded bg-dark bg-opacity-25">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <label class="form-label text-white fw-bold mb-1"><i class="fas fa-id-card me-2"></i>Govt. ID Proof (Aadhaar/PAN)</label>
-                                        <p class="text-muted small mb-0">
-                                            Required for the <strong>Verified Badge</strong>.
-                                            <i class="fas fa-lock ms-1 text-success"></i> <span class="text-success" style="font-size: 0.8rem;">Encrypted & Admin-Only View</span>
-                                        </p>
-                                    </div>
-                                    {% if profile.id_proof_path %}
-                                        <span class="badge bg-success"><i class="fas fa-check"></i> Uploaded</span>
-                                    {% endif %}
-                                </div>
-                                <input type="file" class="form-control form-control-sm mt-2" name="id_proof" accept=".pdf,.jpg">
-                            </div>
+                <!-- SECTION 3: DOCUMENTS -->
+                <div class="glass-card p-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-3"><i class="fas fa-file-alt me-2"></i>Documents & Media</h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Resume / CV (PDF)</label>
+                            <input type="file" class="form-control" name="resume_pdf" accept=".pdf">
                         </div>
-                        <!-- DANGER ZONE -->
-<div class="mt-5 p-4 border border-danger rounded bg-danger bg-opacity-10">
-    <h5 class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</h5>
-    <p class="text-muted small">Deleting your account is irreversible. All your data, applications, and history will be lost.</p>
-    <form action="{{ url_for('delete_profile') }}" method="POST" onsubmit="return confirm('Are you absolutely sure you want to delete your account? This cannot be undone.');">
-        <button type="submit" class="btn btn-outline-danger btn-sm">Delete My Account</button>
-    </form>
-</div>
-                        <!-- OTHER DOCS -->
-                        <div class="col-md-6">
-                            <div class="p-3 border border-secondary rounded bg-dark bg-opacity-25 h-100">
-                                <label class="form-label text-white fw-bold mb-1">Resume / CV (PDF)</label>
-                                <input type="file" class="form-control form-control-sm" name="resume_pdf" accept=".pdf">
-                            </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Video Resume (MP4)</label>
+                            <input type="file" class="form-control" name="video_resume" accept="video/*">
                         </div>
-                        <div class="col-md-6">
-                            <div class="p-3 border border-secondary rounded bg-dark bg-opacity-25 h-100">
-                                <label class="form-label text-white fw-bold mb-1">Video Resume</label>
-                                <input type="file" class="form-control form-control-sm" name="video_resume" accept="video/*">
+                        <div class="col-12">
+                            <div class="p-3 bg-secondary bg-opacity-10 rounded border border-secondary border-opacity-25">
+                                <label class="form-label fw-bold small text-dark">Govt. ID Proof (Aadhaar/PAN)</label>
+                                <input type="file" class="form-control" name="id_proof">
+                                <small class="text-muted d-block mt-1"><i class="fas fa-lock me-1"></i> Required for Verified Badge. Encrypted & Admin-Only View.</small>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="d-flex gap-2 justify-content-end">
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light px-4">Cancel</a>
-                        <button type="submit" class="btn btn-primary px-5 fw-bold">Save Profile</button>
-                    </div>
+                <!-- SUBMIT BUTTON -->
+                <div class="d-grid mb-5">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold">Save Profile Changes</button>
+                </div>
+            </form>
+
+            <!-- SECTION 4: DANGER ZONE (Separate Form) -->
+            <div class="glass-card p-4 border border-danger">
+                <h5 class="fw-bold text-danger mb-3"><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</h5>
+                <p class="text-muted small">Deleting your account is irreversible. All your data, applications, and history will be lost.</p>
+                <form action="{{ url_for('delete_profile') }}" method="POST" onsubmit="return confirm('Are you strictly sure? This cannot be undone.');">
+                    <button type="submit" class="btn btn-outline-danger">Delete My Account</button>
                 </form>
             </div>
+
         </div>
     </div>
 </div>
-
-<script>
-    const expInput = document.getElementById('expYears');
-    const proofSection = document.getElementById('expProofSection');
-    function checkExp() {
-        if (expInput.value > 0) {
-            proofSection.classList.add('border-warning'); proofSection.classList.remove('border-secondary');
-        } else {
-            proofSection.classList.remove('border-warning'); proofSection.classList.add('border-secondary');
-        }
-    }
-    expInput.addEventListener('input', checkExp);
-</script>
 {% endblock %}

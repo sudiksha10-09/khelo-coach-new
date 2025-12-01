@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Chat Layout */
+    .chat-container { height: calc(100vh - 100px); display: flex; overflow: hidden; }
+    .contacts-sidebar { width: 300px; border-right: 1px solid var(--border-color); overflow-y: auto; background: var(--bg-light); }
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: white; }
+    
+    /* Contact Item */
+    .contact-item { padding: 15px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+    .contact-item:hover, .contact-item.active { background: rgba(37, 99, 235, 0.1); }
+    .avatar { width: 45px; height: 45px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+    
+    /* Messages */
+    .messages-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }
+    .message { max-width: 70%; padding: 10px 15px; border-radius: 12px; position: relative; font-size: 0.95rem; }
+    
+    /* My Message (Right) */
+    .message.sent { align-self: flex-end; background: #2563eb; color: white; border-bottom-right-radius: 2px; }
+    
+    /* Their Message (Left) */
+    .message.received { align-self: flex-start; background: #e2e8f0; color: #0f172a; border-bottom-left-radius: 2px; }
+    
+    .msg-time { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; display: block; text-align: right; }
+    
+    /* Input Area */
+    .chat-input-area { padding: 15px; border-top: 1px solid var(--border-color); background: white; display: flex; gap: 10px; }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="chat-container">
+        
+        <!-- SIDEBAR: LIST OF CONTACTS -->
+        <div class="contacts-sidebar">
+            <div class="p-3 border-bottom">
+                <h5 class="fw-bold m-0 text-dark">Messages</h5>
+            </div>
+            
+            {% if contacts %}
+                {% for user in contacts %}
+                <a href="{{ url_for('chat', receiver_id=user.id) }}" class="text-decoration-none text-dark">
+                    <div class="contact-item {% if active_contact and active_contact.id == user.id %}active{% endif %}">
+                        <div class="avatar">
+                            {% if user.profile_pic %}
+                                <img src="{{ user.profile_pic }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            {% else %}
+                                {{ user.username[0]|upper }}
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="fw-bold">{{ user.username }}</div>
+                            <small class="text-muted" style="font-size: 0.8rem;">{{ user.role|capitalize }}</small>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="p-4 text-center text-muted">
+                    <small>No contacts yet. Applications will appear here.</small>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- MAIN CHAT AREA -->
+        <div class="chat-area">
+            {% if active_contact %}
+                <!-- Chat Header -->
+                <div class="p-3 border-bottom d-flex align-items-center bg-white shadow-sm" style="z-index: 10;">
+                    <div class="avatar me-3">
+                        {{ active_contact.username[0]|upper }}
+                    </div>
+                    <div>
+                        <h6 class="fw-bold m-0 text-dark">{{ active_contact.username }}</h6>
+                        <span class="text-success small"><i class="fas fa-circle" style="font-size: 8px;"></i> Online</span>
+                    </div>
+                </div>
+
+                <!-- Messages Feed -->
+                <div class="messages-box" id="messagesBox">
+                    {% for msg in messages %}
+                        <div class="message {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                            {{ msg.content }}
+                            <span class="msg-time">{{ msg.timestamp.strftime('%H:%M') }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Input -->
+                <div class="chat-input-area">
+                    <input type="text" id="messageInput" class="form-control" placeholder="Type a message..." autocomplete="off">
+                    <button class="btn btn-primary" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            {% else %}
+                <div class="d-flex align-items-center justify-content-center h-100 flex-column text-muted">
+                    <i class="far fa-comments fa-4x mb-3"></i>
+                    <h4>Select a conversation</h4>
+                    <p>Start chatting with your applicants or coaches.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- SOCKET.IO SCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    {% if active_contact %}
+        var socket = io();
+        var room = "{{ room }}";
+        var currentUserId = {{ current_user.id }};
+        var receiverId = {{ active_contact.id }};
+
+        // Join Room on Connect
+        socket.on('connect', function() {
+            socket.emit('join', {room: room});
+        });
+
+        // Send Message
+        function sendMessage() {
+            var input = document.getElementById('messageInput');
+            var msg = input.value;
+            if(msg.trim() !== "") {
+                socket.emit('send_message', {
+                    message: msg, 
+                    receiver_id: receiverId, 
+                    room: room
+                });
+                input.value = "";
+            }
+        }
+
+        // Allow 'Enter' key to send
+        document.getElementById('messageInput').addEventListener("keypress", function(event) {
+            if (event.key === "Enter") sendMessage();
+        });
+
+        // Receive Message
+        socket.on('receive_message', function(data) {
+            var box = document.getElementById('messagesBox');
+            var div = document.createElement('div');
+            
+            // Determine class based on who sent it
+            var msgClass = (data.sender_id === currentUserId) ? 'sent' : 'received';
+            
+            div.className = 'message ' + msgClass;
+            div.innerHTML = data.content + '<span class="msg-time">' + data.timestamp + '</span>';
+            
+            box.appendChild(div);
+            scrollToBottom();
+        });
+
+        function scrollToBottom() {
+            var box = document.getElementById('messagesBox');
+            box.scrollTop = box.scrollHeight;
+        }
+        
+        // Scroll on load
+        scrollToBottom();
+    {% endif %}
+</script>
+{% endblock %}

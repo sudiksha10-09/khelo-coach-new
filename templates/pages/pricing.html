@@ -2,38 +2,32 @@
 {% block content %}
 <div class="container py-5">
     <div class="text-center mb-5">
-        <h2 class="fw-bold" style="color: #000000 !important;">Simple, Transparent Pricing</h2>
+        <h2 class="fw-bold text-white">Simple, Transparent Pricing</h2>
         <p class="text-muted">Choose the plan that fits your goals.</p>
     </div>
     <div class="row justify-content-center g-4">
         <!-- Coach Plan -->
         <div class="col-md-4">
-            <div class="glass-card p-4 text-center h-100 border-primary" style="background: #ffffff !important;">
+            <div class="glass-card p-4 text-center h-100 border-primary">
                 <h4 class="text-primary fw-bold">Coach Basic</h4>
-                
-                <!-- NUCLEAR FIX: Inline style forces black text -->
-                <h1 class="display-4 my-3" style="color: #000000 !important; font-weight: 700;">Free</h1>
-                
+                <h1 class="display-4 text-white my-3">Free</h1>
                 <ul class="list-unstyled text-start text-muted mb-4">
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Create Profile</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Upload Video Resume</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Apply to 5 Jobs/Month</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Create Profile</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Upload Video Resume</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Apply to 5 Jobs/Month</li>
                 </ul>
-                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark w-100">Get Started</a>
+                <button class="btn btn-outline-light w-100">Get Started</button>
             </div>
         </div>
         <!-- Academy Plan -->
         <div class="col-md-4">
-            <div class="glass-card p-4 text-center h-100 border-primary" style="background: #f0f9ff !important;">
-                <h4 class="fw-bold" style="color: #000000 !important;">Academy Pro</h4>
-                
-                <!-- NUCLEAR FIX: Inline style forces black text -->
-                <h1 class="display-4 my-3" style="color: #000000 !important; font-weight: 700;">₹1999<span class="fs-6 text-muted">/mo</span></h1>
-                
-                <ul class="list-unstyled text-start mb-4">
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-primary me-2"></i> Unlimited Job Posts</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-primary me-2"></i> Access Verified Database</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-primary me-2"></i> AI Salary Predictor</li>
+            <div class="glass-card p-4 text-center h-100 bg-primary bg-opacity-10 border-primary">
+                <h4 class="text-white fw-bold">Academy Pro</h4>
+                <h1 class="display-4 text-white my-3">₹1999<span class="fs-6 text-muted">/mo</span></h1>
+                <ul class="list-unstyled text-start text-white mb-4">
+                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Unlimited Job Posts</li>
+                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Access Verified Database</li>
+                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> AI Salary Predictor</li>
                 </ul>
                 <button class="btn btn-primary w-100">Upgrade Now</button>
             </div>

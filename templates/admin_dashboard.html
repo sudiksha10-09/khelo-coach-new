@@ -72,6 +72,9 @@
                             <td class="border-0">
                                 <!-- FIXED: Changed btn-outline-light to btn-outline-primary -->
                                 <button class="btn btn-outline-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#reviewCanvas{{ app.id }}">Review</button>
+                                <a href="{{ url_for('chat', receiver_id=app.applicant.id) }}" class="btn btn-outline-primary btn-sm me-1">
+                                    <i class="fas fa-comment-dots"></i>
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
