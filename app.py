@@ -16,10 +16,7 @@ import docx
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
 load_dotenv()
-import stripe
-from flask import request, abort, current_app
 
-stripe.api_key = os.getenv('STRIPE_SECRET_KEY') 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///khelo_coach.db'
@@ -500,67 +497,6 @@ def new_job():
 
     return render_template('job_new.html')
 
-@app.route('/stripe/webhook', methods=['POST'])
-def stripe_webhook():
-    payload = request.data
-    sig_header = request.headers.get('Stripe-Signature', None)
-    webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')  # set per environment
-
-    # 1) Verify signature (protects against fake events)
-    try:
-        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-    except ValueError:
-        # Invalid payload
-        current_app.logger.exception("Invalid payload on Stripe webhook")
-        return '', 400
-    except stripe.error.SignatureVerificationError:
-        current_app.logger.exception("Invalid signature on Stripe webhook")
-        return '', 400
-
-    # 2) Handle events
-    typ = event['type']
-    data = event['data']['object']
-
-    if typ == 'checkout.session.completed':
-        # Session completed -> user subscribed
-        cust_id = data.get('customer')
-        subscription_id = data.get('subscription')
-
-        if cust_id and subscription_id:
-            user = User.query.filter_by(stripe_customer_id=cust_id).first()
-            if user:
-                try:
-                    sub = stripe.Subscription.retrieve(subscription_id)
-                    user.stripe_subscription_id = subscription_id
-                    user.subscription_status = sub.get('status')
-                    price_id = sub['items']['data'][0]['price']['id']
-                    user.subscription_plan = 'basic' if price_id == os.getenv('STRIPE_PRICE_BASIC') else 'pro'
-                    db.session.commit()
-                    current_app.logger.info(f"User {user.email} subscription set to {user.subscription_status}")
-                except Exception as e:
-                    current_app.logger.exception("Error saving subscription after checkout.session.completed")
-    elif typ == 'invoice.payment_succeeded':
-        sub_id = data.get('subscription')
-        if sub_id:
-            user = User.query.filter_by(stripe_subscription_id=sub_id).first()
-            if user:
-                user.subscription_status = 'active'
-                db.session.commit()
-                current_app.logger.info(f"Subscription payment succeeded for {user.email}")
-    elif typ in ('customer.subscription.updated', 'customer.subscription.deleted'):
-        sub = data
-        sub_id = sub.get('id')
-        user = User.query.filter_by(stripe_subscription_id=sub_id).first()
-        if user:
-            user.subscription_status = sub.get('status')
-            db.session.commit()
-            current_app.logger.info(f"Subscription updated ({sub.get('status')}) for {user.email}")
-
-    # you can log other events if needed
-    else:
-        current_app.logger.info(f"Unhandled event type: {typ}")
-
-    return '', 200
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
