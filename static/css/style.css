@@ -1019,3 +1019,51 @@ html { scroll-behavior: smooth; }
         font-size: 1rem;
     }
 }
+/* ===== Polished layout tweaks ===== */
+
+/* slightly narrower sidebar so main chat has more room */
+.contacts-sidebar { width: 280px !important; }
+
+/* ensure messages never hide under the input and keep comfortable gap */
+.messages-box {
+  padding: 24px;
+  padding-bottom: calc( (var(--input-height, 72px)) + 28px ); /* dynamic bottom spacing */
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+/* input area sized variable used by JS to set --input-height */
+.chat-input-area {
+  --input-height: 72px;
+  padding: 14px;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.03);
+}
+
+/* make bubbles align exactly to right with consistent margin */
+.message.sent {
+  margin-right: 8px;
+  margin-left: 30%;
+}
+
+/* received messages have a small left margin */
+.message.received {
+  margin-left: 8px;
+  margin-right: 30%;
+}
+
+/* ensure msg-time is always visible and not overlapped */
+.msg-time { display:block; margin-top:6px; color: rgba(255,255,255,0.9); font-size:0.75rem; opacity:0.95; }
+
+/* bubble min width for single-word small bubbles */
+.message { min-width: 90px; max-width: 72%; word-break: break-word; }
+
+/* send button vertical alignment */
+.chat-input-area .btn { height: 50px; width: 50px; border-radius: 12px; }
+/* status small pills */
+.msg-status { margin-left:8px; font-size:0.78rem; color: rgba(255,255,255,0.9); }
+.msg-status[data-status="sending"] .status-text::after { content: " •"; opacity:0.7;}
+.msg-status[data-status="sent"] .status-text::after { content: " ✓"; opacity:0.9;}
+.msg-status[data-status="read"] .status-text::after { content: " ✓✓"; color:#34d399; opacity:1;}

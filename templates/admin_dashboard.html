@@ -86,7 +86,26 @@
 
     <!-- JOB MANAGEMENT -->
     <div class="glass-card p-4">
-        <h4 class="mb-4 text-dark">Manage Jobs</h4>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h4 class="mb-0 text-dark">Manage Jobs</h4>
+
+            <!-- Post Job CTA (visible and styled) + Explore Coaches link for recruiters/admin -->
+            <div class="d-flex align-items-center gap-2">
+                {% if current_user.role in ['employer', 'admin'] %}
+                  <a href="{{ url_for('explore_coaches') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-search me-1"></i> Explore Coaches
+                  </a>
+                  <a href="{{ url_for('new_job') }}" class="btn btn-primary btn-sm fw-bold">
+                    <i class="fas fa-plus-circle me-2"></i> Post Job
+                  </a>
+                {% else %}
+                  <!-- Keep UI space consistent for coaches but don't show privileged CTAs -->
+                  <a href="#" class="btn btn-outline-secondary btn-sm disabled" title="Only recruiters can explore coaches">Explore Coaches</a>
+                  <a href="#" class="btn btn-outline-secondary btn-sm disabled" title="Only recruiters can post jobs">Post Job</a>
+                {% endif %}
+            </div>
+        </div>
+
         <div class="table-responsive">
             <!-- FIXED: Added text-dark to table -->
             <table class="table align-middle text-dark">

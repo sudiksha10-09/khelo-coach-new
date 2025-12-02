@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="m-0">Discover Coaches</h3>
+    <div>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm me-2">Back</a>
+      {% if current_user.role == 'employer' %}
+        <a href="{{ url_for('new_job') }}" class="btn btn-primary btn-sm">Post Job</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <form id="filters" method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+      <label class="form-label small">Sport</label>
+      <select name="sport" class="form-select form-select-sm">
+        <option value="">Any</option>
+        {% for s in sports %}
+          <option value="{{ s }}" {% if filters.sport == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Verified</label>
+      <select name="verified" class="form-select form-select-sm">
+        <option value="">Any</option>
+        <option value="1" {% if filters.verified == '1' %}selected{% endif %}>Only Verified</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Has Video</label>
+      <select name="has_video" class="form-select form-select-sm">
+        <option value="">Any</option>
+        <option value="1" {% if filters.has_video == '1' %}selected{% endif %}>Only With Video</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small">Min Experience (yrs)</label>
+      <input type="number" name="min_exp" class="form-control form-control-sm" value="{{ filters.min_exp or '' }}" min="0">
+    </div>
+    <div class="col-md-3 text-end">
+      <button class="btn btn-sm btn-primary">Apply</button>
+      <a href="{{ url_for('explore_coaches') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+    </div>
+  </form>
+
+  <!-- CARDS -->
+  <div class="row g-3">
+    {% for prof in coaches %}
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:56px;height:56px;border-radius:8px;overflow:hidden;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;">
+              {% if prof.user.profile_pic %}
+                <img src="{{ prof.user.profile_pic }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+              {% else %}
+                {{ prof.full_name[0] if prof.full_name else prof.user.username[0] }}
+              {% endif %}
+            </div>
+            <div style="min-width:0;">
+              <div class="fw-bold" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                {{ prof.full_name or prof.user.username }}
+              </div>
+              <div class="small text-muted">{{ prof.sport or '—' }} • {{ prof.experience_years or 0 }}y</div>
+            </div>
+          </div>
+
+          <p class="small text-muted mt-3 mb-2" style="flex:1; overflow:hidden;">
+            {{ (prof.bio[:140] + '...') if prof.bio and prof.bio|length > 140 else (prof.bio or '') }}
+          </p>
+
+          <div class="d-flex gap-2 align-items-center mt-2">
+            {% if prof.is_verified %}
+              <span class="badge bg-success">Verified</span>
+            {% endif %}
+            {% if prof.video_resume_path %}
+              <span class="badge bg-info text-dark">Has Video</span>
+            {% endif %}
+            <span class="ms-auto">
+              <a href="{{ url_for('view_resume', user_id=prof.user_id) }}" class="btn btn-sm btn-outline-primary">Profile</a>
+              <a href="{{ url_for('chat', receiver_id=prof.user_id) }}" class="btn btn-sm btn-primary">Message</a>
+            </span>
+          </div>
+
+          {% if prof.distance_km is defined and prof.distance_km %}
+            <div class="text-muted small mt-2">~ {{ prof.distance_km }} km away</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- PAGINATION -->
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination">
+      {% if pagination.has_prev %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('explore_coaches', page=pagination.prev_num, **request.args.to_dict()) }}">Prev</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Prev</span></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ pagination.page }} / {{ pagination.pages }}</span></li>
+      {% if pagination.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('explore_coaches', page=pagination.next_num, **request.args.to_dict()) }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endblock %}
