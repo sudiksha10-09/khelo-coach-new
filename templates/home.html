@@ -2,11 +2,9 @@
 
 {% block content %}
 
-<!-- HERO SECTION – clean, no glow, no image -->
 <section class="hero-clean">
   <div class="container hero-clean-grid">
     
-    <!-- LEFT: COPY -->
     <div class="hero-clean-copy">
       <div class="badge-pill">AI for Sports Hiring</div>
 
@@ -42,11 +40,8 @@
       </div>
     </div>
 
-    <!-- RIGHT: ANIMATION + KEY POINTS -->
     <div class="hero-clean-visual">
-      <!-- LOTTIE ANIMATION (outside any box) -->
       <div class="hero-lottie-wrapper">
-        <!-- Replace src with your chosen Lottie JSON URL -->
         <lottie-player
           src="https://lottie.host/e222d575-0e39-4628-8e3c-498cc5901b9b/jSq2nF8L6G.json"
           background="transparent"
@@ -56,7 +51,6 @@
         ></lottie-player>
       </div>
 
-      <!-- KEY POINT PILLS -->
       <div class="hero-kpi-row">
         <div class="hero-kpi">
           <span class="kpi-label">Verified Profiles</span>
@@ -76,7 +70,6 @@
   </div>
 </section>
 
-<!-- SEGMENT SECTION -->
 <section class="segment-section py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5 glide-up">
@@ -84,14 +77,12 @@
             <p class="section-subtitle">Choose your path and discover opportunities</p>
         </div>
         <div class="row g-4">
-            <!-- Coaches -->
             <div class="col-md-6">
                 <div class="segment-card glide-up" style="transition-delay: 0.1s;">
                     <div class="segment-icon"><i class="fas fa-user-tie"></i></div>
                     <h3>For Coaches</h3>
                     <p>Build your brand. Get discovered by top academies.</p>
                     <ul class="feature-list mb-4">
-                        <li>Create AI-powered video resume</li>
                         <li>Get verified with trust badge</li>
                         <li>Access 100+ job opportunities</li>
                     </ul>
@@ -102,7 +93,6 @@
                     {% endif %}
                 </div>
             </div>
-            <!-- Academies -->
             <div class="col-md-6">
                 <div class="segment-card glide-up" style="transition-delay: 0.2s;">
                     <div class="segment-icon" style="background: linear-gradient(135deg, var(--accent-orange), #dc2626);"><i class="fas fa-building"></i></div>
@@ -124,7 +114,6 @@
     </div>
 </section>
 
-<!-- HOW IT WORKS (Flipping Cards + Toggle) -->
 <section class="how-it-works py-5" id="how-it-works">
     <div class="container">
         <div class="text-center mb-4 glide-up">
@@ -132,7 +121,6 @@
             <p class="section-subtitle">Simple steps to success (Hover cards to flip)</p>
         </div>
 
-        <!-- TOGGLE SWITCH -->
         <div class="d-flex justify-content-center mb-5 glide-up" style="transition-delay: 0.1s;">
             <div class="glass-card p-1 d-inline-flex rounded-pill" style="border: 1px solid var(--border-color); background: white;">
                 <button class="btn btn-primary rounded-pill px-4 py-2 shadow-sm" id="btn-coach" onclick="toggleSteps('coach')">For Coaches</button>
@@ -140,9 +128,7 @@
             </div>
         </div>
 
-        <!-- COACH STEPS -->
         <div id="coach-steps" class="row g-4">
-            <!-- Step 1 -->
             <div class="col-lg-3 col-md-6">
                 <div class="flip-card-wrapper glide-up" style="transition-delay: 0.1s;">
                     <div class="flip-card-inner">
@@ -158,23 +144,21 @@
                     </div>
                 </div>
             </div>
-            <!-- Step 2 -->
             <div class="col-lg-3 col-md-6">
                 <div class="flip-card-wrapper glide-up" style="transition-delay: 0.2s;">
                     <div class="flip-card-inner">
                         <div class="flip-card-front">
                             <div class="step-number mb-3">2</div>
-                            <h4>Upload Video</h4>
-                            <i class="fas fa-video text-primary fs-2 mt-3"></i>
+                            <h4>Add Experience</h4>
+                            <i class="fas fa-list-alt text-primary fs-2 mt-3"></i>
                         </div>
                         <div class="flip-card-back">
                             <h4>Showcase Skills</h4>
-                            <p class="small">Record a coaching video resume to showcase your skills and personality.</p>
+                            <p class="small">List your past coaching roles, key achievements, and specializations to build a strong profile.</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Step 3 -->
             <div class="col-lg-3 col-md-6">
                 <div class="flip-card-wrapper glide-up" style="transition-delay: 0.3s;">
                     <div class="flip-card-inner">
@@ -190,7 +174,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Step 4 -->
             <div class="col-lg-3 col-md-6">
                 <div class="flip-card-wrapper glide-up" style="transition-delay: 0.4s;">
                     <div class="flip-card-inner">
@@ -208,7 +191,6 @@
             </div>
         </div>
 
-        <!-- ACADEMY STEPS (Hidden by default) -->
         <div id="academy-steps" class="row g-4" style="display: none;">
             <div class="col-lg-3 col-md-6">
                 <div class="flip-card-wrapper glide-up">
@@ -245,12 +227,12 @@
                     <div class="flip-card-inner">
                         <div class="flip-card-front">
                             <div class="step-number mb-3" style="background: var(--accent-orange);">3</div>
-                            <h4>Video Review</h4>
-                            <i class="fas fa-play-circle text-warning fs-2 mt-3"></i>
+                            <h4>Review Profiles</h4>
+                            <i class="fas fa-search text-warning fs-2 mt-3"></i>
                         </div>
                         <div class="flip-card-back" style="background: linear-gradient(135deg, var(--accent-orange), #ea580c);">
-                            <h4>See Skills</h4>
-                            <p class="small">Don't guess. Watch coaching drills directly on the platform to assess technique.</p>
+                            <h4>See Details</h4>
+                            <p class="small">View detailed profiles, certifications, and verification status before contacting.</p>
                         </div>
                     </div>
                 </div>
@@ -275,7 +257,6 @@
     </div>
 </section>
 
-<!-- TESTIMONIALS SECTION -->
 <section class="testimonials-section py-5">
     <div class="container">
         <div class="text-center mb-5 glide-up">
@@ -283,7 +264,6 @@
             <p class="section-subtitle">Real coaches, real results</p>
         </div>
         <div class="row g-4">
-            <!-- Testimonial 1 -->
             <div class="col-lg-4 col-md-6 glide-up" style="transition-delay: 0.1s;">
                 <div class="testimonial-card">
                     <div class="testimonial-header">
@@ -293,13 +273,12 @@
                             <p>Cricket Coach • Mumbai</p>
                         </div>
                     </div>
-                    <p class="testimonial-text">"I got hired within 2 weeks. The video resume feature really helped me stand out. The academy loved seeing my coaching style!"</p>
+                    <p class="testimonial-text">"I got hired within 2 weeks. The verified profile feature really helped me stand out. The academy loved seeing my certifications!"</p>
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                 </div>
             </div>
-            <!-- Testimonial 2 -->
             <div class="col-lg-4 col-md-6 glide-up" style="transition-delay: 0.2s;">
                 <div class="testimonial-card">
                     <div class="testimonial-header">
@@ -315,7 +294,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Testimonial 3 -->
             <div class="col-lg-4 col-md-6 glide-up" style="transition-delay: 0.3s;">
                 <div class="testimonial-card">
                     <div class="testimonial-header">
@@ -335,7 +313,6 @@
     </div>
 </section>
 
-<!-- TECHNOLOGY SECTION -->
 <section class="tech-section py-5 bg-white">
     <div class="container">
         <div class="text-center mb-5 glide-up">
@@ -352,9 +329,9 @@
             </div>
             <div class="col-lg-3 col-md-6 glide-up" style="transition-delay: 0.2s;">
                 <div class="tech-card">
-                    <div class="tech-icon"><i class="fas fa-video"></i></div>
-                    <h4>Video Resumes</h4>
-                    <p>Showcase your personality and coaching style engagingly</p>
+                    <div class="tech-icon"><i class="fas fa-sliders-h"></i></div>
+                    <h4>Smart Filters</h4>
+                    <p>Quickly narrow down candidates by sport, location, and experience level</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 glide-up" style="transition-delay: 0.3s;">
@@ -375,7 +352,6 @@
     </div>
 </section>
 
-<!-- CTA SECTION -->
 {% if not current_user.is_authenticated %}
 <section class="cta-section">
     <div class="container">
@@ -397,7 +373,6 @@
 </section>
 {% endif %}
 
-<!-- INTERSECTION OBSERVER & TOGGLE LOGIC -->
 <script>
     // 1. Glide Reveal Observer
     document.addEventListener("DOMContentLoaded", function() {

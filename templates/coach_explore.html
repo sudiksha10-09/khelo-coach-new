@@ -11,9 +11,8 @@
     </div>
   </div>
 
-  <!-- FILTERS -->
   <form id="filters" method="get" class="row g-2 align-items-end mb-3">
-    <div class="col-md-3">
+    <div class="col-md-4">
       <label class="form-label small">Sport</label>
       <select name="sport" class="form-select form-select-sm">
         <option value="">Any</option>
@@ -29,14 +28,7 @@
         <option value="1" {% if filters.verified == '1' %}selected{% endif %}>Only Verified</option>
       </select>
     </div>
-    <div class="col-md-2">
-      <label class="form-label small">Has Video</label>
-      <select name="has_video" class="form-select form-select-sm">
-        <option value="">Any</option>
-        <option value="1" {% if filters.has_video == '1' %}selected{% endif %}>Only With Video</option>
-      </select>
-    </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
       <label class="form-label small">Min Experience (yrs)</label>
       <input type="number" name="min_exp" class="form-control form-control-sm" value="{{ filters.min_exp or '' }}" min="0">
     </div>
@@ -46,7 +38,6 @@
     </div>
   </form>
 
-  <!-- CARDS -->
   <div class="row g-3">
     {% for prof in coaches %}
     <div class="col-md-4">
@@ -76,9 +67,7 @@
             {% if prof.is_verified %}
               <span class="badge bg-success">Verified</span>
             {% endif %}
-            {% if prof.video_resume_path %}
-              <span class="badge bg-info text-dark">Has Video</span>
-            {% endif %}
+            
             <span class="ms-auto">
               <a href="{{ url_for('view_resume', user_id=prof.user_id) }}" class="btn btn-sm btn-outline-primary">Profile</a>
               <a href="{{ url_for('chat', receiver_id=prof.user_id) }}" class="btn btn-sm btn-primary">Message</a>
@@ -94,7 +83,6 @@
     {% endfor %}
   </div>
 
-  <!-- PAGINATION -->
   <nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination">
       {% if pagination.has_prev %}

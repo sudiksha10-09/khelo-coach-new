@@ -2,7 +2,8 @@ import os
 import math
 import requests
 import re
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+import stripe # Added Stripe import
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,9 +25,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///khelo_coach.db'
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+# --- STRIPE CONFIGURATION ---
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+app.config['STRIPE_PUBLISHABLE_KEY'] = os.getenv('STRIPE_PUBLISHABLE_KEY')
+app.config['STRIPE_PRICE_BASIC'] = os.getenv('STRIPE_PRICE_BASIC')
+app.config['STRIPE_PRICE_PRO'] = os.getenv('STRIPE_PRICE_PRO')
+app.config['STRIPE_WEBHOOK_SECRET'] = os.getenv('STRIPE_WEBHOOK_SECRET')
+
 # --- FOLDERS ---
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['VIDEO_FOLDER'] = 'static/videos'
 app.config['CERT_FOLDER'] = 'static/certs'
 app.config['RESUME_FOLDER'] = 'static/resumes'
 app.config['PROFILE_PIC_FOLDER'] = 'static/profile_pics'
@@ -36,7 +43,7 @@ app.config['TEMP_FOLDER'] = 'static/temp_docs'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 folders = [
-    app.config['UPLOAD_FOLDER'], app.config['VIDEO_FOLDER'],
+    app.config['UPLOAD_FOLDER'],
     app.config['CERT_FOLDER'], app.config['RESUME_FOLDER'],
     app.config['PROFILE_PIC_FOLDER'], app.config['EXP_PROOF_FOLDER'],
     app.config['ID_PROOF_FOLDER'], app.config['TEMP_FOLDER']
@@ -81,6 +88,10 @@ class User(UserMixin, db.Model):
     google_id = db.Column(db.String(200), unique=True)
     profile_pic = db.Column(db.String(300))
 
+    # STRIPE FIELDS
+    subscription_status = db.Column(db.String(50), default='free') # free, basic, pro
+    stripe_customer_id = db.Column(db.String(150))
+
     profile = db.relationship('Profile', backref='user', uselist=False)
     jobs = db.relationship('Job', backref='employer', lazy=True)
     applications = db.relationship('Application', backref='applicant', lazy=True)
@@ -99,7 +110,7 @@ class Profile(db.Model):
     travel_range = db.Column(db.String(100))
     is_verified = db.Column(db.Boolean, default=False)
     views = db.Column(db.Integer, default=0)
-    video_resume_path = db.Column(db.String(300))
+    
     cert_proof_path = db.Column(db.String(300))
     resume_path = db.Column(db.String(300))
     experience_proof_path = db.Column(db.String(300))
@@ -129,9 +140,8 @@ class Job(db.Model):
     salary_range = db.Column(db.String(100))
     posted_date = db.Column(db.DateTime, default=datetime.utcnow)
     required_skills = db.Column(db.String(300))
-    # NEW FIELDS
-    job_type = db.Column(db.String(50), default='Full Time')  # e.g. Part Time, Internship
-    working_hours = db.Column(db.String(100))  # e.g. 40 hours/week
+    job_type = db.Column(db.String(50), default='Full Time')  
+    working_hours = db.Column(db.String(100)) 
 
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -174,7 +184,6 @@ def get_profile_completion(profile):
     if profile.phone: score += 10
     if profile.certifications: score += 10
     if profile.id_proof_path: score += 10
-    if profile.video_resume_path: score += 10
     if profile.resume_path: score += 10
     return min(score, 100)
 
@@ -213,13 +222,10 @@ def calculate_ai_score(job, profile):
             score += 10
     return min(score, 100)
 
-# UPDATED AI SALARY LOGIC
 def predict_salary_ai(sport, location, description, job_type):
-    # 1. Start with a Base Salary
     base = 15000
     reason = "Base entry level."
 
-    # 2. Adjust for Sport
     if sport and sport.lower() == 'cricket':
         base += 10000
         reason = "Cricket (High Demand)"
@@ -227,18 +233,15 @@ def predict_salary_ai(sport, location, description, job_type):
         base += 5000
         reason = "Football (Growing Demand)"
 
-    # 3. Adjust for Location (Metro Cities pay more)
     if location and ('mumbai' in location.lower() or 'delhi' in location.lower() or 'bangalore' in location.lower()):
         base += 8000
         reason += " + Metro City"
 
-    # 4. Adjust for Role Level in Description
     desc_lower = description.lower() if description else ""
     if 'head coach' in desc_lower or 'senior' in desc_lower:
         base += 15000
         reason += " + Senior Role"
 
-    # 5. CRITICAL: Adjust for Job Type
     if job_type == 'Internship':
         base = base * 0.4
         reason += " (Adjusted for Internship)"
@@ -249,13 +252,11 @@ def predict_salary_ai(sport, location, description, job_type):
         base = base * 1.2
         reason += " (Contract Premium)"
 
-    # Round it to nice numbers
     min_sal = int(base)
     max_sal = int(base * 1.2)
 
     return (f"{min_sal} - {max_sal}", reason)
 
-# ROBUST AI PARSER
 def smart_parse_document(filepath):
     text = ""
     ext = filepath.rsplit('.', 1)[1].lower()
@@ -269,7 +270,6 @@ def smart_parse_document(filepath):
             doc = docx.Document(filepath)
             for para in doc.paragraphs:
                 text += para.text + "\n"
-
         elif ext == 'txt':
             with open(filepath, 'r', encoding='utf-8') as f:
                 text = f.read()
@@ -287,7 +287,6 @@ def smart_parse_document(filepath):
 
     for line in lines:
         lower_line = line.lower()
-
         if lower_line.startswith('job title:') or lower_line.startswith('title:') or lower_line.startswith('role:'):
             parts = line.split(':', 1)
             if len(parts) > 1 and parts[1].strip():
@@ -305,7 +304,6 @@ def smart_parse_document(filepath):
         if lower_line.startswith('location:') or lower_line.startswith('venue:'):
             data['location'] = line.split(':', 1)[1].strip()
             continue
-
         if lower_line.startswith('salary:') or lower_line.startswith('pay:'):
             data['salary'] = line.split(':', 1)[1].strip()
             continue
@@ -324,10 +322,7 @@ def smart_parse_document(filepath):
             desc_lines.append(line)
 
     full_text_lower = text.lower()
-    sports_list = ['Cricket', 'Football', 'Tennis', 'Basketball', 'Badminton', 'Swimming', 'Hockey',
-                   'Volleyball', 'Table Tennis', 'Wrestling', 'Boxing', 'Shooting', 'Archery',
-                   'Gymnastics', 'Squash', 'Weightlifting', 'Judo', 'Cycling', 'Golf', 'Rugby',
-                   'Handball', 'Kho Kho', 'Chess', 'Athletics']
+    sports_list = ['Cricket', 'Football', 'Tennis', 'Basketball', 'Badminton', 'Swimming', 'Hockey', 'Athletics']
 
     for s in sports_list:
         if s.lower() in full_text_lower:
@@ -357,59 +352,42 @@ def generate_ai_resume_content(profile):
     return summary
 
 # --- ROUTES ---
-# Discover / Explore Coaches for Recruiters
-# Discover / Explore Coaches for Recruiters (fixed)
+
 @app.route('/coaches')
 @login_required
 def explore_coaches():
-    # Optional: restrict to recruiters/admins
-    # if current_user.role != 'employer':
-    #     return redirect(url_for('dashboard'))
-
     sport = request.args.get('sport', type=str)
-    verified = request.args.get('verified')      # '1' or None
-    has_video = request.args.get('has_video')    # '1' or None
+    verified = request.args.get('verified')      
     min_exp = request.args.get('min_exp', type=int)
     page = request.args.get('page', 1, type=int)
     per_page = 12
 
-    # Start from Profile and join User once via relationship
-    # Using the relationship avoids ambiguous table aliases
-    query = Profile.query.join(Profile.user)  # Profile.user is the relationship to User
-
-    # Ensure we only return coach accounts
+    query = Profile.query.join(Profile.user)
     query = query.filter(User.role == 'coach')
 
     if sport:
         query = query.filter(Profile.sport.ilike(f"%{sport}%"))
     if verified == '1':
         query = query.filter(Profile.is_verified == True)
-    if has_video == '1':
-        query = query.filter(Profile.video_resume_path.isnot(None))
     if min_exp is not None:
         query = query.filter(Profile.experience_years >= min_exp)
 
-    # Ordering
     query = query.order_by(Profile.is_verified.desc(), Profile.experience_years.desc(), Profile.id.desc())
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     coaches = pagination.items
 
-    # Optional distance calculation if lat/lng provided
     user_lat = request.args.get('lat', type=float)
     user_lng = request.args.get('lng', type=float)
     if user_lat is not None and user_lng is not None:
         for p in coaches:
-            # if profile has lat/lng fields (adjust attribute names if different)
             lat_attr = getattr(p, 'lat', None)
             lng_attr = getattr(p, 'lng', None)
             if lat_attr and lng_attr:
-                # haversine(lat1, lon1, lat2, lon2) — ensure signature matches your helper
                 p.distance_km = round(haversine(user_lat, user_lng, lng_attr, lat_attr), 1)
             else:
                 p.distance_km = None
 
-    # Distinct sports for the dropdown
     sports_rows = db.session.query(Profile.sport).filter(Profile.sport != None).distinct().all()
     sports = [s[0] for s in sports_rows if s[0]]
 
@@ -417,7 +395,7 @@ def explore_coaches():
                            coaches=coaches,
                            pagination=pagination,
                            sports=sports,
-                           filters=dict(sport=sport, verified=verified, has_video=has_video, min_exp=min_exp, lat=user_lat, lng=user_lng))
+                           filters=dict(sport=sport, verified=verified, min_exp=min_exp, lat=user_lat, lng=user_lng))
 
 
 @app.route('/plans')
@@ -430,6 +408,12 @@ def show_plans():
 def new_job():
     if current_user.role != 'employer':
         return redirect(url_for('dashboard'))
+    
+    # STRIPE CHECK: Ensure paid plan for jobs (Optional logic)
+    # if current_user.subscription_status == 'free':
+    #     flash("Please upgrade to post jobs.")
+    #     return redirect(url_for('show_plans'))
+    
     predicted_salary = None
     ai_reason = None
     form_data = {}
@@ -515,7 +499,6 @@ def edit_profile():
 
         files_map = {
             'profile_image': (app.config['PROFILE_PIC_FOLDER'], 'pic_', 'current_user'),
-            'video_resume': (app.config['VIDEO_FOLDER'], 'vid_', 'profile'),
             'cert_proof': (app.config['CERT_FOLDER'], 'cert_', 'profile'),
             'resume_pdf': (app.config['RESUME_FOLDER'], 'resume_', 'profile'),
             'experience_proof': (app.config['EXP_PROOF_FOLDER'], 'exp_', 'profile'),
@@ -530,8 +513,6 @@ def edit_profile():
                     current_user.profile_pic = url_for('static', filename=f'profile_pics/{filename}')
                 elif key == 'id_proof':
                     profile.id_proof_path = filename
-                elif key == 'video_resume':
-                    profile.video_resume_path = filename
                 elif key == 'cert_proof':
                     profile.cert_proof_path = filename
                 elif key == 'resume_pdf':
@@ -619,8 +600,6 @@ def register():
 def login():
     if request.method == 'POST':
         user = User.query.filter_by(email=request.form.get('email')).first()
-
-        # 1. FIX: Check if user.password is NOT None before checking hash
         if user and user.password and check_password_hash(user.password, request.form.get('password')):
             login_user(user)
             if user.role == 'admin':
@@ -630,14 +609,10 @@ def login():
             if user.role == 'coach':
                 return redirect(url_for('show_plans'))
             return redirect(url_for('dashboard'))
-
-        # 2. Handle Google Users trying to use password
         elif user and not user.password:
             flash('This account was created with Google. Please use "Login with Google".')
-
         else:
             flash('Invalid credentials')
-
     return render_template('login.html')
 
 @app.route('/logout')
@@ -831,7 +806,6 @@ def delete_profile():
     flash('Your account has been permanently deleted.')
     return redirect(url_for('home'))
 
-# --- EDIT JOB ROUTE ---
 @app.route('/job/edit/<int:job_id>', methods=['GET', 'POST'])
 @login_required
 def edit_job(job_id):
@@ -841,7 +815,6 @@ def edit_job(job_id):
     if job.employer_id != current_user.id:
         flash("Unauthorized access!")
         return redirect(url_for('dashboard'))
-
     if request.method == 'POST':
         job.title = request.form.get('title')
         job.sport = request.form.get('sport')
@@ -852,20 +825,16 @@ def edit_job(job_id):
         job.salary_range = request.form.get('salary')
         job.job_type = request.form.get('job_type')
         job.working_hours = request.form.get('working_hours')
-
         lat = request.form.get('lat')
         lng = request.form.get('lng')
         if lat and lng and lat.strip() != '' and lng.strip() != '':
             job.lat = float(lat)
             job.lng = float(lng)
-
         db.session.commit()
         flash("Job Updated Successfully!")
         return redirect(url_for('dashboard'))
-
     return render_template('job_edit.html', job=job)
 
-# --- FORGOT PASSWORD ROUTES ---
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -885,33 +854,26 @@ def reset_password_mock():
         return redirect(url_for('login'))
     return render_template('reset_password.html')
 
-# ==============================
-#      CHAT ROUTES (UPDATED)
-# ==============================
 @app.route('/chat')
 @app.route('/chat/<int:receiver_id>')
 @login_required
 def chat(receiver_id=None):
-    # Build contacts list based on role
     if current_user.role == 'employer':
         my_jobs = Job.query.filter_by(employer_id=current_user.id).all()
         job_ids = [j.id for j in my_jobs]
         apps = Application.query.filter(Application.job_id.in_(job_ids)).all()
-        contacts = list({app.applicant for app in apps})  # distinct applicants
+        contacts = list({app.applicant for app in apps})
     else:
         my_apps = Application.query.filter_by(user_id=current_user.id).all()
-        contacts = list({app.job.employer for app in my_apps})  # distinct employers
+        contacts = list({app.job.employer for app in my_apps})
 
-    # Enrich contacts with sidebar info
     for u in contacts:
-        # last message in this conversation
         last_msg = Message.query.filter(
             ((Message.sender_id == current_user.id) & (Message.receiver_id == u.id)) |
             ((Message.sender_id == u.id) & (Message.receiver_id == current_user.id))
         ).order_by(Message.timestamp.desc()).first()
         u.last_message = last_msg.content if last_msg else None
         u.last_message_time = last_msg.timestamp.isoformat() if last_msg else None
-        # unread count: messages from them -> me, not read
         u.unread_count = Message.query.filter_by(sender_id=u.id, receiver_id=current_user.id, is_read=False).count()
 
     active_contact = None
@@ -922,14 +884,10 @@ def chat(receiver_id=None):
         active_contact = User.query.get_or_404(receiver_id)
         user_ids = sorted([current_user.id, receiver_id])
         room = f"chat_{user_ids[0]}_{user_ids[1]}"
-
-        # conversation messages
         messages = Message.query.filter(
             ((Message.sender_id == current_user.id) & (Message.receiver_id == receiver_id)) |
             ((Message.sender_id == receiver_id) & (Message.receiver_id == current_user.id))
         ).order_by(Message.timestamp.asc()).all()
-
-        # mark their messages to me as read
         changed = False
         for m in messages:
             if m.receiver_id == current_user.id and not m.is_read:
@@ -944,10 +902,7 @@ def chat(receiver_id=None):
                            messages=messages,
                            room=room)
 
-# ==============================
-#      SOCKET EVENTS (UPDATED)
-# ==============================
-
+# --- SOCKET EVENTS ---
 @socketio.on('join')
 def on_join(data):
     room = data.get('room')
@@ -959,7 +914,7 @@ def handle_send_message_event(data):
     content = data.get('message', '')
     receiver_id = data.get('receiver_id')
     room = data.get('room')
-    client_id = data.get('client_id')  # optional from frontend
+    client_id = data.get('client_id')
 
     if not current_user.is_authenticated or not room or not content.strip():
         return
@@ -973,7 +928,6 @@ def handle_send_message_event(data):
         'client_id': client_id,
         'content': new_msg.content,
         'sender_id': current_user.id,
-        # ISO string so JS can show Today/Yesterday 10:30 AM
         'timestamp': new_msg.timestamp.isoformat(),
         'status': 'sent',
         'sender_name': current_user.username
@@ -982,20 +936,98 @@ def handle_send_message_event(data):
 @socketio.on('typing')
 def handle_typing(data):
     room = data.get('room')
-    if not room:
-        return
-    if not current_user.is_authenticated:
+    if not room or not current_user.is_authenticated:
         return
     emit('typing', {'sender_id': current_user.id}, room=room, include_self=False)
 
 @socketio.on('stop_typing')
 def handle_stop_typing(data):
     room = data.get('room')
-    if not room:
-        return
-    if not current_user.is_authenticated:
+    if not room or not current_user.is_authenticated:
         return
     emit('stop_typing', {'sender_id': current_user.id}, room=room, include_self=False)
+
+# --- STRIPE PAYMENT ROUTES ---
+@app.route('/create-checkout-session', methods=['POST'])
+@login_required
+def create_checkout_session():
+    plan_type = request.form.get('plan_type') 
+    
+    if plan_type == 'basic':
+        price_id = app.config['STRIPE_PRICE_BASIC']
+    elif plan_type == 'pro':
+        price_id = app.config['STRIPE_PRICE_PRO']
+    else:
+        flash("Invalid plan selected")
+        return redirect(url_for('show_plans'))
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price': price_id,
+                    'quantity': 1,
+                },
+            ],
+            mode='subscription', 
+            success_url=url_for('payment_success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=url_for('show_plans', _external=True),
+            customer_email=current_user.email, 
+            metadata={'user_id': current_user.id, 'plan_type': plan_type}
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        flash(f"Error creating checkout session: {str(e)}")
+        return redirect(url_for('show_plans'))
+
+@app.route('/payment-success')
+@login_required
+def payment_success():
+    session_id = request.args.get('session_id')
+    if not session_id:
+        return redirect(url_for('dashboard'))
+    
+    try:
+        session_info = stripe.checkout.Session.retrieve(session_id)
+        plan = session_info.metadata.get('plan_type', 'free')
+        
+        current_user.subscription_status = plan
+        db.session.commit()
+        
+        flash(f"Subscription successful! You are now on the {plan.upper()} plan.")
+        return redirect(url_for('dashboard'))
+    except Exception as e:
+        flash("Error verifying payment.")
+        return redirect(url_for('dashboard'))
+
+@app.route('/stripe_webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, app.config['STRIPE_WEBHOOK_SECRET']
+        )
+    except ValueError as e:
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError as e:
+        return 'Invalid signature', 400
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session.get('metadata', {}).get('user_id')
+        plan_type = session.get('metadata', {}).get('plan_type')
+        
+        if user_id:
+            user = User.query.get(user_id)
+            if user:
+                user.subscription_status = plan_type
+                user.stripe_customer_id = session.get('customer')
+                db.session.commit()
+
+    return 'Success', 200
 
 # --- STATIC PAGES ---
 @app.route('/about')

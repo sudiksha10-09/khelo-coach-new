@@ -3,7 +3,6 @@
 {% block content %}
 <div class="container py-4">
     
-    <!-- 1. HERO WELCOME SECTION -->
     <div class="glass-card p-4 mb-5 position-relative overflow-hidden">
         <div class="position-absolute top-0 end-0 p-5 bg-primary opacity-10 rounded-circle" style="filter: blur(60px); width: 200px; height: 200px; transform: translate(30%, -30%);"></div>
         <div class="row align-items-center position-relative z-1">
@@ -20,7 +19,6 @@
         </div>
     </div>
 
-    <!-- 2. EXPANDED STATS ROW -->
     <div class="row g-4 mb-5">
         <div class="col-md-3 col-sm-6">
             <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
@@ -63,7 +61,6 @@
     </div>
 
     <div class="row g-4">
-        <!-- 3. MAIN COLUMN -->
         <div class="col-lg-8">
             <ul class="nav nav-pills mb-4" id="dashboardTabs" role="tablist">
                 <li class="nav-item me-2"><button class="nav-link active rounded-pill px-4" id="jobs-tab" data-bs-toggle="tab" data-bs-target="#jobs-content"><i class="fas fa-briefcase me-2"></i>Explore Jobs</button></li>
@@ -71,14 +68,12 @@
             </ul>
 
             <div class="tab-content" id="dashboardTabsContent">
-                <!-- JOBS TAB -->
                 <div class="tab-pane fade show active" id="jobs-content">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="fw-bold mb-0">Recommended Opportunities</h4>
                         <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#filterPanel"><i class="fas fa-filter me-2"></i>Filters</button>
                     </div>
                     
-                    <!-- Collapsible Filters -->
                     <div class="collapse mb-4" id="filterPanel">
                         <div class="glass-card p-3">
                             <form action="{{ url_for('dashboard') }}" method="GET" class="row g-3">
@@ -124,7 +119,6 @@
                                 </div>
                             </div>
                             
-                            <!-- APPLY MODAL -->
                             <div class="modal fade" id="applyModal{{ job.id }}" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content glass-card border-0">
@@ -170,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- APPS TAB -->
                 <div class="tab-pane fade" id="apps-content">
                     <h4 class="fw-bold mb-4">Application History</h4>
                     {% if my_apps %}
@@ -197,12 +190,10 @@
             </div>
         </div>
 
-        <!-- 4. SIDEBAR -->
         <div class="col-lg-4">
             <div class="glass-card p-4 mb-4">
                 <h5 class="fw-bold mb-3">Profile Health</h5>
                 <div class="d-flex flex-column gap-3">
-                    <div class="d-flex align-items-center"><i class="fas {% if current_user.profile.video_resume_path %}fa-check-circle text-success{% else %}fa-circle text-muted{% endif %} me-3"></i><span>Video Resume</span></div>
                     <div class="d-flex align-items-center"><i class="fas {% if current_user.profile.resume_path %}fa-check-circle text-success{% else %}fa-circle text-muted{% endif %} me-3"></i><span>PDF Resume</span></div>
                     <div class="d-flex align-items-center"><i class="fas {% if current_user.profile.is_verified %}fa-check-circle text-success{% else %}fa-circle text-muted{% endif %} me-3"></i><span>Admin Verification</span></div>
                 </div>
@@ -222,7 +213,6 @@
     </div>
 </div>
 
-<!-- TOAST NOTIFICATION CONTAINER -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
     <div id="liveToast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">

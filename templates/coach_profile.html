@@ -5,7 +5,6 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             
-            <!-- HEADER -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="fw-bold text-dark m-0">Edit Profile</h2>
                 {% if profile.is_verified %}
@@ -15,10 +14,8 @@
                 {% endif %}
             </div>
 
-            <!-- MAIN FORM (Profile Data) -->
             <form method="POST" enctype="multipart/form-data" class="mb-5">
                 
-                <!-- SECTION 1: IDENTITY & LOCATION -->
                 <div class="glass-card p-4 mb-4">
                     <h5 class="fw-bold text-primary mb-3"><i class="fas fa-map-marker-alt me-2"></i>Identity & Location</h5>
                     <div class="row g-3">
@@ -50,7 +47,6 @@
                     </div>
                 </div>
 
-                <!-- SECTION 2: PROFESSIONAL DETAILS -->
                 <div class="glass-card p-4 mb-4">
                     <h5 class="fw-bold text-primary mb-3"><i class="fas fa-trophy me-2"></i>Professional Details</h5>
                     <div class="row g-3">
@@ -91,17 +87,12 @@
                     </div>
                 </div>
 
-                <!-- SECTION 3: DOCUMENTS -->
                 <div class="glass-card p-4 mb-4">
                     <h5 class="fw-bold text-primary mb-3"><i class="fas fa-file-alt me-2"></i>Documents & Media</h5>
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label fw-bold small text-muted">Resume / CV (PDF)</label>
                             <input type="file" class="form-control" name="resume_pdf" accept=".pdf">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-bold small text-muted">Video Resume (MP4)</label>
-                            <input type="file" class="form-control" name="video_resume" accept="video/*">
                         </div>
                         <div class="col-12">
                             <div class="p-3 bg-secondary bg-opacity-10 rounded border border-secondary border-opacity-25">
@@ -113,13 +104,11 @@
                     </div>
                 </div>
 
-                <!-- SUBMIT BUTTON -->
                 <div class="d-grid mb-5">
                     <button type="submit" class="btn btn-primary btn-lg fw-bold">Save Profile Changes</button>
                 </div>
             </form>
 
-            <!-- SECTION 4: DANGER ZONE (Separate Form) -->
             <div class="glass-card p-4 border border-danger">
                 <h5 class="fw-bold text-danger mb-3"><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</h5>
                 <p class="text-muted small">Deleting your account is irreversible. All your data, applications, and history will be lost.</p>

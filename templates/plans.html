@@ -1,63 +1,79 @@
 {% extends "base.html" %}
+
 {% block content %}
 <div class="container py-5">
+    
     <div class="text-center mb-5">
-        <h2 class="fw-bold" style="color: #000000 !important;">Simple, Transparent Pricing</h2>
-        <p class="text-muted" style="color: #666 !important;">Choose the plan that fits your goals.</p>
+        <h2 class="fw-bold text-dark">Simple, Transparent Pricing</h2>
+        <p class="text-muted">Choose the plan that fits your goals.</p>
     </div>
+
     <div class="row justify-content-center g-4">
-        <!-- Coach Basic Plan -->
+        
         <div class="col-md-4">
-            <div class="glass-card p-4 text-center h-100 border-primary" style="background: #ffffff !important;">
-                <h4 class="text-primary fw-bold">Coach Basic</h4>
-                
-                <h1 class="display-4 my-3" style="color: #000000 !important; font-weight: 700;">Free</h1>
-                <p class="text-muted mb-4" style="color: #666 !important;">/forever</p>
-                
-                <ul class="list-unstyled text-start text-muted mb-4">
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Create Digital Profile</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Upload Video Resume</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Apply to Jobs</li>
-                    <li class="mb-2" style="color: #999 !important;"><i class="fas fa-times me-2"></i> Top of Search Results</li>
-                </ul>
-                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark w-100">Continue Free</a>
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body p-4 text-center d-flex flex-column">
+                    <h4 class="text-secondary fw-bold">Coach Basic</h4>
+                    <h1 class="display-4 my-3 fw-bold text-dark">Free</h1>
+                    <p class="text-muted mb-4">/forever</p>
+                    
+                    <ul class="list-unstyled text-start mb-4 flex-grow-1">
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-success me-2"></i> Create Digital Profile</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-success me-2"></i> Apply to Jobs</li>
+                        <li class="mb-2 text-muted text-decoration-line-through"><i class="fas fa-times me-2"></i> Top of Search Results</li>
+                    </ul>
+                    
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark w-100 mt-auto">Continue Free</a>
+                </div>
             </div>
         </div>
 
-        <!-- Coach Premium Plan (NEW) -->
         <div class="col-md-4">
-            <div class="glass-card p-4 text-center h-100 border-success" style="background: #ffffff !important; border: 2px solid #28a745;">
-                <div class="badge bg-success mb-2">MOST POPULAR</div>
-                <h4 class="text-success fw-bold">Coach Premium</h4>
+            <div class="card shadow h-100 border-2 border-success position-relative overflow-hidden">
+                <div class="position-absolute top-0 end-0 bg-success text-white px-3 py-1 small fw-bold rounded-bottom-start">POPULAR</div>
                 
-                <h1 class="display-4 my-3" style="color: #000000 !important; font-weight: 700;">₹499<span class="fs-6 text-muted">/mo</span></h1>
-                
-                <ul class="list-unstyled text-start text-muted mb-4">
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> All Basic Features</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> <strong>Top of Search Results</strong></li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Profile Analytics</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-success me-2"></i> Priority Support</li>
-                </ul>
-                <button class="btn btn-success w-100">Upgrade</button>
+                <div class="card-body p-4 text-center d-flex flex-column">
+                    <h4 class="text-success fw-bold">Coach Premium</h4>
+                    <h1 class="display-4 my-3 fw-bold text-dark">₹1500<span class="fs-6 text-muted fw-normal">/mo</span></h1>
+                    
+                    <ul class="list-unstyled text-start mb-4 flex-grow-1">
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-success me-2"></i> <strong>Top of Search Results</strong></li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-success me-2"></i> Profile Analytics</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-success me-2"></i> Priority Support</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-success me-2"></i> All Basic Features</li>
+                    </ul>
+                    
+                    <form action="{{ url_for('create_checkout_session') }}" method="POST" class="mt-auto">
+                        <input type="hidden" name="plan_type" value="basic"> <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm">
+                            Upgrade to Premium <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Academy Plan -->
         <div class="col-md-4">
-            <div class="glass-card p-4 text-center h-100 border-primary" style="background: #f0f9ff !important;">
-                <h4 class="fw-bold" style="color: #000000 !important;">Academy Pro</h4>
-                
-                <h1 class="display-4 my-3" style="color: #000000 !important; font-weight: 700;">₹1999<span class="fs-6 text-muted">/mo</span></h1>
-                
-                <ul class="list-unstyled text-start mb-4">
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-primary me-2"></i> Unlimited Job Posts</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-primary me-2"></i> Access Verified Database</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-primary me-2"></i> AI Salary Predictor</li>
-                    <li class="mb-2" style="color: #333 !important;"><i class="fas fa-check text-primary me-2"></i> Verified Coach Badges</li>
-                </ul>
-                <button class="btn btn-primary w-100">Upgrade Now</button>
+            <div class="card shadow-sm h-100 border-primary" style="background: #f8fbff;">
+                <div class="card-body p-4 text-center d-flex flex-column">
+                    <h4 class="text-primary fw-bold">Academy Pro</h4>
+                    <h1 class="display-4 my-3 fw-bold text-dark">₹4500<span class="fs-6 text-muted fw-normal">/mo</span></h1>
+                    
+                    <ul class="list-unstyled text-start mb-4 flex-grow-1">
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-primary me-2"></i> Unlimited Job Posts</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-primary me-2"></i> Access Verified Database</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-primary me-2"></i> AI Salary Predictor</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check text-primary me-2"></i> Verified Coach Badges</li>
+                    </ul>
+                    
+                    <form action="{{ url_for('create_checkout_session') }}" method="POST" class="mt-auto">
+                        <input type="hidden" name="plan_type" value="pro"> <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">
+                            Get Academy Pro
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 {% endblock %}
