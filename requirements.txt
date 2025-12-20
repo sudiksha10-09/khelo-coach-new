@@ -11,3 +11,4 @@ python-dotenv
 PyPDF2
 python-docx
 flask-socketio
+stripe
