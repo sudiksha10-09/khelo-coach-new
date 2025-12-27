@@ -1,130 +1,144 @@
-# create_seed.py
-# Place this file in the same folder as your app.py and run: python create_seed.py
-# It will create sample users, profiles, jobs and applications.
-
+import app
+from app import db, User, Profile, Job, Application, Review
 from werkzeug.security import generate_password_hash
-from app import app, db, User, Profile, Job, Application
 from datetime import datetime
+import random
 
-def seed():
-    with app.app_context():
-        print("Seeding database...")
+def run_seeds():
+    with app.app.app_context():
 
-        # OPTIONAL: Uncomment to wipe existing tables (CAREFUL)
-        # db.drop_all()
-        # db.create_all()
+        print("🌱 Seeding database...")
 
-        # Helper to avoid duplicates
-        def get_or_create_user(email, username, role, password=None, picture=None):
-            u = User.query.filter_by(email=email).first()
-            if u:
-                return u
-            u = User(
-                username=username,
-                email=email,
-                role=role,
-                profile_pic=picture,
-                password=generate_password_hash(password) if password else None
-            )
-            db.session.add(u)
-            db.session.flush()  # get id for profile relation
-            return u
+        # -----------------------
+        # USERS
+        # -----------------------
+        admin = User(
+            username="Admin",
+            email="admin@khelo.com",
+            role="admin",
+            password=generate_password_hash("admin123")
+        )
 
-        # --- Create Recruiters / Employers ---
-        emp1 = get_or_create_user("recruiter1@example.com", "CoachHire Pvt", "employer", "password123")
-        emp2 = get_or_create_user("recruiter2@example.com", "Elite Academies", "employer", "password123")
+        employer = User(
+            username="Mumbai Academy",
+            email="academy@khelo.com",
+            role="employer",
+            password=generate_password_hash("academy123")
+        )
 
-        # --- Create Coaches ---
-        coach1 = get_or_create_user("coach1@example.com", "Rahul Sharma", "coach", "password123")
-        coach2 = get_or_create_user("coach2@example.com", "Maya Patel", "coach", "password123")
-        coach3 = get_or_create_user("coach3@example.com", "Arjun Verma", "coach", "password123")
+        coach1 = User(
+            username="Rahul Coach",
+            email="rahul@khelo.com",
+            role="coach",
+            password=generate_password_hash("coach123")
+        )
 
-        # Commit users so we have IDs
+        coach2 = User(
+            username="Amit Coach",
+            email="amit@khelo.com",
+            role="coach",
+            password=generate_password_hash("coach123")
+        )
+
+        db.session.add_all([admin, employer, coach1, coach2])
         db.session.commit()
 
-        # Create Profiles for coaches if missing
-        def ensure_profile(u, full_name, sport, exp, bio, city="Mumbai"):
-            p = Profile.query.filter_by(user_id=u.id).first()
-            if p:
-                return p
-            p = Profile(
-                user_id=u.id,
-                full_name=full_name,
-                phone="9999999999",
-                sport=sport,
-                experience_years=exp,
-                certifications="Level 1, First Aid",
-                bio=bio,
-                city=city,
-                is_verified=(exp >= 3),
-                views=0
+        # -----------------------
+        # PROFILES
+        # -----------------------
+        profiles = [
+            Profile(
+                user_id=coach1.id,
+                full_name="Rahul Sharma",
+                sport="Cricket",
+                experience_years=5,
+                city="Mumbai",
+                certifications="BCCI Level 1",
+                bio="Experienced cricket coach for junior & senior teams.",
+                is_verified=True
+            ),
+            Profile(
+                user_id=coach2.id,
+                full_name="Amit Verma",
+                sport="Football",
+                experience_years=3,
+                city="Pune",
+                certifications="AIFF C License",
+                bio="Youth football coach with academy experience.",
+                is_verified=False
             )
-            db.session.add(p)
-            return p
+        ]
 
-        p1 = ensure_profile(coach1, "Rahul Sharma", "Cricket", 5,
-                            "Experienced cricket coach focused on batting and fielding.")
-        p2 = ensure_profile(coach2, "Maya Patel", "Badminton", 2,
-                            "Former state player; coaching juniors and adults.")
-        p3 = ensure_profile(coach3, "Arjun Verma", "Football", 1,
-                            "Enthusiastic football coach specialized in youth programs.")
-
+        db.session.add_all(profiles)
         db.session.commit()
 
-        # Create sample jobs by employers
-        def create_job(employer, title, sport, location, desc, salary="25000"):
-            j = Job(
+        # -----------------------
+        # JOBS
+        # -----------------------
+        jobs = [
+            Job(
                 employer_id=employer.id,
-                title=title,
-                sport=sport,
-                location=location,
-                lat=None,
-                lng=None,
-                description=desc,
-                requirements="Coaching certificate | Experience preferred",
-                screening_questions="Do you have a bike? | Years of coaching?",
-                is_active=True,
-                salary_range=salary,
+                title="Cricket Head Coach",
+                sport="Cricket",
+                location="Mumbai",
+                description="Looking for an experienced cricket coach.",
+                requirements="BCCI certification, 3+ years experience",
+                salary_range="30000 - 50000",
+                job_type="Full Time",
+                is_active=True
+            ),
+            Job(
+                employer_id=employer.id,
+                title="Football Assistant Coach",
+                sport="Football",
+                location="Pune",
+                description="Assist senior coach for youth teams.",
+                requirements="AIFF license preferred",
+                salary_range="15000 - 25000",
                 job_type="Part Time",
-                working_hours="4 PM - 8 PM",
-                posted_date=datetime.utcnow()
+                is_active=True
             )
-            db.session.add(j)
-            return j
+        ]
 
-        job1 = create_job(emp1, "Junior Cricket Coach", "Cricket", "Bandra, Mumbai",
-                          "Looking for a junior coach for weekend batches.")
-        job2 = create_job(emp2, "Badminton Coach - Weekend", "Badminton", "Pune",
-                          "Coach required for weekend academy coaching.")
-
+        db.session.add_all(jobs)
         db.session.commit()
 
-        # Create sample applications: coach1 applies to job1, coach2 to job2
-        def create_application(job, user, status="Applied", match_score=80):
-            existing = Application.query.filter_by(job_id=job.id, user_id=user.id).first()
-            if existing:
-                return existing
-            a = Application(
-                job_id=job.id,
-                user_id=user.id,
-                status=status,
-                match_score=match_score,
-                custom_resume_path=None,
-                screening_answers="Yes|5",
-            )
-            db.session.add(a)
-            return a
+        # -----------------------
+        # APPLICATIONS
+        # -----------------------
+        app1 = Application(
+            job_id=jobs[0].id,
+            user_id=coach1.id,
+            match_score=90,
+            match_reasons="Sport Match (+40) | Experience > 2y (+30) | Verified Badge (+20)",
+            status="Applied"
+        )
 
-        app1 = create_application(job1, coach1, status="Applied", match_score=85)
-        app2 = create_application(job2, coach2, status="Shortlisted", match_score=72)
+        app2 = Application(
+            job_id=jobs[1].id,
+            user_id=coach2.id,
+            match_score=70,
+            match_reasons="Sport Match (+40) | Experience > 2y (+30)",
+            status="Interview"
+        )
 
+        db.session.add_all([app1, app2])
         db.session.commit()
 
-        print("Seed complete. Created:")
-        print(f" - Employers: {emp1.email}, {emp2.email}")
-        print(f" - Coaches: {coach1.email}, {coach2.email}, {coach3.email}")
-        print(f" - Jobs: {job1.title} (by {emp1.email}), {job2.title} (by {emp2.email})")
-        print(f" - Applications: {app1.id}, {app2.id}")
+        # -----------------------
+        # REVIEWS
+        # -----------------------
+        review = Review(
+            profile_id=profiles[0].id,
+            reviewer_id=employer.id,
+            rating=5,
+            comment="Excellent coach with great discipline."
+        )
+
+        db.session.add(review)
+        db.session.commit()
+
+        print("✅ Seeding completed successfully!")
 
 if __name__ == "__main__":
-    seed()
+    run_seeds()

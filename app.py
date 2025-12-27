@@ -20,7 +20,9 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///khelo_coach.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -72,27 +74,36 @@ google = oauth.register(
     server_metadata_url=app.config['GOOGLE_DISCOVERY_URL'],
     client_kwargs={'scope': 'openid email profile'},
 )
-
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # --- MODELS ---
 class User(UserMixin, db.Model):
+    __tablename__ = "user"
+
     id = db.Column(db.Integer, primary_key=True)
+
     username = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=True)
+
+    # 🔴 IMPORTANT: password hashes are LONG
+    # Werkzeug hashes can exceed 300 chars
+    password = db.Column(db.Text, nullable=True)
+
     role = db.Column(db.String(50), default='coach')
-    google_id = db.Column(db.String(200), unique=True)
-    profile_pic = db.Column(db.String(300))
+
+    # Google IDs & profile pics can also be long
+    google_id = db.Column(db.String(255), unique=True)
+    profile_pic = db.Column(db.Text)
 
     # STRIPE FIELDS
-    subscription_status = db.Column(db.String(50), default='free') # free, basic, pro
-    stripe_customer_id = db.Column(db.String(150))
+    subscription_status = db.Column(db.String(50), default='free')  # free, basic, pro
+    stripe_customer_id = db.Column(db.String(255))
 
-    profile = db.relationship('Profile', backref='user', uselist=False)
+    # Relationships
+    profile = db.relationship('Profile', backref='user', uselist=False, cascade="all, delete-orphan")
     jobs = db.relationship('Job', backref='employer', lazy=True)
     applications = db.relationship('Application', backref='applicant', lazy=True)
     reviews_given = db.relationship('Review', backref='reviewer', lazy=True)
@@ -1142,9 +1153,6 @@ def create_checkout_session(plan):
 
     except Exception as e:
         return str(e), 400
-
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+db.init_app(app)
+if __name__ == "__main__":
     socketio.run(app, debug=True)
